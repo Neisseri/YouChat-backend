@@ -2,7 +2,7 @@ import json
 from django.http import HttpRequest, HttpResponse
 from utils.utils_request import BAD_METHOD, request_failed, request_success, return_field
 from utils.utils_require import MAX_CHAR_LENGTH, CheckRequire, require
-from User.models import User, Contacts, FriendRequests
+from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from utils.utils_time import get_timestamp
 
 
@@ -64,16 +64,68 @@ def user(req: HttpRequest):
 
 # /friends view
 def friends(req: HttpRequest):
+    
     if req.method == "GET":
-        
-        return request_success()
+        token = req.GET.get("token")
+        if not token:
+            return request_failed(2, "Bad Token", status_code=400)
+        token_pair = TokenPair.objects.filter(token=token).first()
+        user = token_pair.user
+        contact_list = Contacts.objects.filter(user=user)
+        for contact in contact_list:
+            contact.friend.serialize()
+        return_data = {
+            "friendList": {
+                "default": [
+                return_field(contact.friend.serialize(), ["userId", "nickname"]) 
+            for contact in contact_list]},
+        }
+        return request_success(return_data)
         
     elif req.method == "POST":
         body = json.loads(req.body.decode("utf-8"))
+        token = body['token']
+        if not token:
+            return request_failed(2, "Bad Token", status_code=400)
+        token_pair = TokenPair.objects.filter(token=token).first()
+        sendee = token_pair.user
+        user_name = body["userName"]
+        sender = User.objects.filter(name = user_name).first()
+        request = FriendRequests.objects.filter(sender=sender, sendee=sendee).first()
+        if not request:
+            return request_failed(2, "[Some Message]", status_code=400)
+        new_friend = Contacts(user=sender, friend=sendee, group = UserGroup.objects.get(user=sender, group_name = 'default'))
+        new_friend_rev = Contacts(user=sendee, friend=sender, group = UserGroup.objects.get(user=sendee, group_name = 'default'))
+        new_friend.save()
+        new_friend_rev.save()
+        request.delete()
+        return request_success()
+    
+    elif req.method == "PUT":
+        body = json.loads(req.body.decode("utf-8"))
+        token = body['token']
+        if not token:
+            return request_failed(2, "Bad Token", status_code=400)
+        token_pair = TokenPair.objects.filter(token=token).first()
+        sender = token_pair.user
+        user_name = body["userName"]
+        sendee = User.objects.filter(name = user_name).first()
+        friend_request = FriendRequests(sender=sender, sendee=sendee)
+        friend_request.save()
+        return request_success()
+    
+    elif req.method == "DELETE":
+        token = req.COOKIES.get("token")
+        token_pair = TokenPair.objects.filter(token=token).first()
+        sender = token_pair.user
+        user_name = body["userName"]
+        sendee = User.objects.filter(name = user_name).first()
+        Contacts.objects.get(user=sender, friend=sendee).delete()
+        Contacts.objects.get(user=sendee, friend=sender).delete()
         return request_success()
                 
     else:
-        return request_success()
+        return BAD_METHOD
 
 # /email/send view
 def email_send(req: HttpRequest):
