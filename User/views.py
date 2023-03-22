@@ -1,4 +1,5 @@
 import json
+import random
 from django.http import HttpRequest, HttpResponse
 from utils.utils_request import BAD_METHOD, request_failed, request_success, return_field
 from utils.utils_require import MAX_CHAR_LENGTH, CheckRequire, require
@@ -40,24 +41,79 @@ def check_for_user_data(body):
 
     return user_name, password, nickname, email
 
+def check_for_user_name_password(body):
+
+    user_name = require(body, "userName", "string", err_msg="Missing or error type of [userName]")
+    password = require(body, "password", "string", err_msg="Missing or error type of [password]")
+
+    assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
+    assert 5 <= len(password) <= 20, "Bad length of [password]"
+
+    for i in range(0, len(user_name)):
+        assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
+        
+    for i in range(0, len(password)):
+        assert (check_number_letter(password[i]) or password[i] == '_' or password[i] == '*'), "Invalid char in [password]"
+
+    return user_name, password
+
+
 # /user view
 def user(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
 
-    if req.method == "GET":
-        user_name, password, nickname, email = check_for_user_data(body)
+    if req.method == "POST":
+        user_name, password= check_for_user_name_password(body)
         
-        return request_success()
+        user = User.objects.filter(name=user_name).first()
+
+        if not user:
+            return request_failed(2, "User Not Found", status_code=400)
+
+        if user.password != password:
+            return request_failed(2, "Wrong Password", status_code=400)
+
+        token = random.randint(0, 1000)
+        tokenPair = TokenPair(user=user, token=token)
+        tokenPair.save()
+
+        return request_success({"token":token})
         
     
-    elif req.method == "POST":
-        
-        return request_success()
+    elif req.method == "PUT":
+        user_name, password, nickname, email = check_for_user_data(body)
+
+        #find the user to check if exists.
+        user = User.objects.filter(name=user_name).first()
+
+        if not user:
+            #create a new user
+            user = User(name=user_name, password = password, nickname = nickname, email = email)
+            user.save()
+        else :
+            return request_failed(8, "User exists", status_code=400)
+
+        token = random.randint(0, 1000)
+        tokenPair = TokenPair(user=user, token=token)
+        tokenPair.save()
+
+        return request_success({"token":token})
 
     elif req.method == "DELETE":
+        user_name, password= check_for_user_name_password(body)
+        
+        user = User.objects.filter(name=user_name).first()
 
-        return request_success()
+        if not user:
+            return request_failed(2, "User Not Found", status_code=400)
+
+        if user.password != password:
+            return request_failed(2, "Wrong Password", status_code=400)
+
+        user.delete()
+
+        return request_failed(0, "Success Deleted", status_code=200)
         
     else:
         return request_success()
