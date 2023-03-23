@@ -14,8 +14,6 @@ build:
     - export BUILD_IMAGE_PASSWORD=$CI_REGISTRY_PASSWORD
     - deployer build
   # TODO Start: [Student] Set as only master
-  only:
-    - master
   # TODO End: [Student] Set as only master
 
 unit-test:
@@ -45,6 +43,4 @@ deploy:
     - export DEPLOY_ENV=$GITLAB_USER_LOGIN
     - deployer dyno replace backend $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG gitlab-ci-token $REGISTRY_PWD
   # TODO Start: [Student] Set as only master
-  only:
-    - master
   # TODO End: [Student] Set as only master
