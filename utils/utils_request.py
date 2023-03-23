@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 
-
 def request_failed(code, info, status_code=400):
     return JsonResponse({
         "code": code,
