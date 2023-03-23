@@ -4,7 +4,11 @@ from utils.utils_request import BAD_METHOD, request_failed, request_success, ret
 from utils.utils_require import MAX_CHAR_LENGTH, CheckRequire, require
 from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from utils.utils_time import get_timestamp
+from django.urls import path, re_path
+from django.core.mail import send_mail
+import random
 
+veri_code: int
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -127,21 +131,45 @@ def friends(req: HttpRequest):
     else:
         return BAD_METHOD
 
-# /email/send view
-def email_send(req: HttpRequest):
 
-    body = json.loads(req.body.decode("utf-8"))
+def generate_veri_code():
+    # 6 digit verification code
+    veri_code = ""
+    for i in range(6):
+        veri_code += str(random.randint(0, 9))
+    return veri_code
+
+
+# /email/send view
+def email_send(req: HttpRequest, email):
 
     if req.method == "GET":
+        veri_code = generate_veri_code()
+        # declare veri_code as a global variable
 
+        send_mail(
+            'SwimChat验证码',
+            '欢迎您使用SwimChat, 您的验证码为: ' + veri_code,
+            'swimchat@sina.com',
+            [email],
+        )
+        
         return request_success()
     
 # email/verify view
-def email_verify(req: HttpRequest):
-
-    body = json.loads(req.body.decode("utf-8"))
+def email_verify(req: HttpRequest, v_code):
 
     if req.method == "GET":
 
-        return request_success()
+        if int(v_code) == int(veri_code):
+
+            token = random.randint(1, 1000)
+
+            response = {
+                "code": 0,
+	            "info": "Login Success",
+	            "token": token
+            }
+
+            return request_success(response)
 
