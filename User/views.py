@@ -95,6 +95,8 @@ def user(req: HttpRequest):
             #create a new user
             user = User(name=user_name, password = password, nickname = nickname, email = email)
             user.save()
+            user_group = UserGroup(user = user)
+            user_group.save()
         else :
             return request_failed(8, "User exists", status_code=400)
 
@@ -135,10 +137,12 @@ def friends(req: HttpRequest):
         for contact in contact_list:
             contact.friend.serialize()
         return_data = {
-            "friendList": {
-                "default": [
-                return_field(contact.friend.serialize(), ["userId", "nickname"]) 
-            for contact in contact_list]},
+            "friendList": [
+                {
+                    "group": "Default", 
+                    "list": [return_field(contact.friend.serialize(), ["userId", "nickname"]) for contact in contact_list]
+                }
+            ]
         }
         return request_success(return_data)
         
