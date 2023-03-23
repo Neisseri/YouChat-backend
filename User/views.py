@@ -200,6 +200,7 @@ def generate_veri_code():
 def email_send(req: HttpRequest, email):
 
     if req.method == "GET":
+        global veri_code
         veri_code = generate_veri_code()
         # declare veri_code as a global variable
 
@@ -220,6 +221,7 @@ def email_verify(req: HttpRequest, v_code):
 
     if req.method == "GET":
 
+        global veri_code
         if int(v_code) == int(veri_code):
 
             token = random.randint(1, 1000)
