@@ -203,14 +203,17 @@ def email_send(req: HttpRequest, email):
         veri_code = generate_veri_code()
         # declare veri_code as a global variable
 
-        send_mail(
+        mail_num = send_mail(
             'SwimChat验证码',
             '欢迎您使用SwimChat, 您的验证码为: ' + veri_code,
             'swimchat@sina.com',
             [email],
         )
         
-        return request_success()
+        if (mail_num == 1):
+            return request_success()
+        else:
+            return request_failed(code=2, info="Email Not Existed or Sending Failure")
     
 # email/verify view
 def email_verify(req: HttpRequest, v_code):
@@ -220,12 +223,15 @@ def email_verify(req: HttpRequest, v_code):
         if int(v_code) == int(veri_code):
 
             token = random.randint(1, 1000)
-
             response = {
                 "code": 0,
 	            "info": "Login Success",
 	            "token": token
             }
-
             return request_success(response)
+        
+        else:
+
+            return request_failed(code=2, info="Login Failure")
+
 
