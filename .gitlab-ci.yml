@@ -40,6 +40,6 @@ unit-test:
 deploy:
   stage: deploy
   script:
-    - deployer dyno replace backend $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG gitlab-ci-token $REGISTRY_PWD
+    - deployer dyno replace $CI_PROJECT_NAME $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG $REGISTRY_USER $REGISTRY_PWD
   # TODO Start: [Student] Set as only master
   # TODO End: [Student] Set as only master
