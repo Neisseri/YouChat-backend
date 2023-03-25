@@ -209,8 +209,8 @@ def email_send(req: HttpRequest, email):
         # declare veri_code as a global variable
 
         mail_num = send_mail(
-            'SwimChat验证码',
-            '欢迎您使用SwimChat, 您的验证码为: ' + veri_code,
+            'YouChat验证码',
+            '欢迎您使用YouChat, 您的验证码为: ' + veri_code,
             'swimchat@sina.com',
             [email],
         )

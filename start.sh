@@ -3,7 +3,7 @@ python3 manage.py makemigrations User
 python3 manage.py migrate
 
 # TODO Start: [Student] Run with uWSGI instead
-#python3 manage.py runserver 80
+# python3 manage.py runserver 80
 uwsgi --module=st_im_django.wsgi:application \
     --env DJANGO_SETTINGS_MODULE=st_im_django.settings \
     --master \
