@@ -63,6 +63,7 @@ def check_for_user_name_password(body):
 
 
 # /user view
+@CheckRequire
 def user(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
@@ -95,8 +96,6 @@ def user(req: HttpRequest):
             #create a new user
             user = User(name=user_name, password = password, nickname = nickname, email = email)
             user.save()
-            user_group = UserGroup(user = user)
-            user_group.save()
         else :
             return request_failed(8, "User exists", status_code=400)
 
@@ -220,9 +219,19 @@ def friends(req: HttpRequest, query: any):
             request = FriendRequests.objects.filter(sendee=user, sender=target).first()
             
             if request:
+                group = UserGroup.objects.filter(user=target, group_name = 'Default')
+                group_rev = UserGroup.objects.filter(user=user, group_name = body['group'])
 
-                new_friend = Contacts(user=target, friend=user, group = UserGroup.objects.get(user=sender, group_name = 'Default'))
-                new_friend_rev = Contacts(user=user, friend=target, group = UserGroup.objects.get(user=sendee, group_name = body['group']))
+                if not group:
+                    user_group = UserGroup(user=target, group_name = 'Default')
+                    user_group.save()
+
+                if not group_rev:
+                    user_group = UserGroup(user=user, group_name = body['group'])
+                    user_group.save()
+
+                new_friend = Contacts(user=target, friend=user, group = UserGroup.objects.get(user=target, group_name = 'Default'))
+                new_friend_rev = Contacts(user=user, friend=target, group = UserGroup.objects.get(user=user, group_name = body['group']))
                 
                 new_friend.save()
                 new_friend_rev.save()
@@ -309,4 +318,30 @@ def email_verify(req: HttpRequest, v_code):
 
             return request_failed(code=2, info="Login Failure")
 
+def profile(req: HttpRequest, id: any):
 
+    token = req.COOKIES.get('token')
+        
+    if not token:
+        return request_failed(2, "Bad Token", status_code=400)
+    
+    user = TokenPair.objects.filter(token=token).first().user()
+    target = User.objects.filter(user_id=id).first()
+
+    return_data = {
+            "profile": return_field(target.serialize(), ["id", "nickname", "username", "email"])
+        }
+    
+    contact = Contacts.objects.filter(user=user, friend=target).first()
+    if contact:
+        return_data["profile"]['group'] = contact.group
+    
+    else:
+        request = FriendRequests.objects.filter(sendee=user, sender=target).first()
+        if request:
+            return_data["profile"]['group'] = "Request"
+            
+        else:
+            return_data["profile"]['group'] = "Stranger"
+    
+    return request_success(return_data)

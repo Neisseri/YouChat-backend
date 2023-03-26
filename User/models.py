@@ -21,7 +21,9 @@ class User(models.Model):
     def serialize(self):
         return {
             "id": self.user_id,
-			"nickname": self.nickname 
+			"nickname": self.nickname,
+            "username": self.name,
+		    "email": self.email,
         }
 
     class Meta:
