@@ -20,7 +20,7 @@ class User(models.Model):
 
     def serialize(self):
         return {
-            "userId": self.user_id,
+            "id": self.user_id,
 			"nickname": self.nickname 
         }
 
@@ -35,7 +35,7 @@ class User(models.Model):
 class UserGroup(models.Model):
     group_id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    group_name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False, default='default')
+    group_name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False, default='Default')
 
     class Meta:
         unique_together = ['user', 'group_name']

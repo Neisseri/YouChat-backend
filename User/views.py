@@ -125,69 +125,138 @@ def user(req: HttpRequest):
         return request_success()
 
 # /friends view
-def friends(req: HttpRequest):
+def friends(req: HttpRequest, query: any):
     
     if req.method == "GET":
-        token = req.GET.get("token")
+        token = req.COOKIES.get("token")
+
         if not token:
             return request_failed(2, "Bad Token", status_code=400)
-        token_pair = TokenPair.objects.filter(token=token).first()
-        user = token_pair.user
+        
+        user = TokenPair.objects.filter(token=token).first().user()
+
+        query_list = User.objects.filter(Q(name_contains=query) | Q(nickname_contains=query) | Q(email_contains=query))
+
         contact_list = Contacts.objects.filter(user=user)
-        for contact in contact_list:
-            contact.friend.serialize()
+
+        request_list = Contacts.objects.filter(sendee=user)
+
         return_data = {
             "friendList": [
                 {
                     "group": "Default", 
-                    "list": [return_field(contact.friend.serialize(), ["userId", "nickname"]) for contact in contact_list]
+                    "list": []
                 }
             ]
         }
+
+        def where_is_group(group_name):
+            
+            for i in range(len(return_data["friendList"])):
+                if return_data["friendList"][i]["group"] == group_name:
+                    return i
+            
+            return -1
+
+        for query_item in query_list:
+            contact = contact_list.filter(friend=query_item).first()
+            if contact:
+                group_index = where_is_group(contact.group)
+                
+                if group_index != -1:   #already exists in friendList
+                    return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
+                
+                else:
+                    return_data["friendList"].append(
+                        {
+                            "group": contact.group, 
+                            "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                        }
+                    )
+            else:
+                request = request_list.filter(sender=query_item).first()
+                if request:
+                    group_index = where_is_group("Request")
+
+                    if group_index != -1:   #already exists in friendList
+                        return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
+                    
+                    else:
+                        return_data["friendList"].append(
+                            {
+                                "group": "Request", 
+                                "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                            }
+                        )
+                else:
+                    group_index = where_is_group("Stranger")
+                    
+                    if group_index != -1:   #already exists in friendList
+                        return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
+                    
+                    else:
+                        return_data["friendList"].append(
+                            {
+                                "group": "Stranger", 
+                                "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                            }
+                        )
+
         return request_success(return_data)
-        
-    elif req.method == "POST":
-        body = json.loads(req.body.decode("utf-8"))
-        token = body['token']
-        if not token:
-            return request_failed(2, "Bad Token", status_code=400)
-        token_pair = TokenPair.objects.filter(token=token).first()
-        sendee = token_pair.user
-        user_name = body["userName"]
-        sender = User.objects.filter(name = user_name).first()
-        request = FriendRequests.objects.filter(sender=sender, sendee=sendee).first()
-        if not request:
-            return request_failed(2, "[Some Message]", status_code=400)
-        new_friend = Contacts(user=sender, friend=sendee, group = UserGroup.objects.get(user=sender, group_name = 'default'))
-        new_friend_rev = Contacts(user=sendee, friend=sender, group = UserGroup.objects.get(user=sendee, group_name = 'default'))
-        new_friend.save()
-        new_friend_rev.save()
-        request.delete()
-        return request_success()
-    
+
     elif req.method == "PUT":
         body = json.loads(req.body.decode("utf-8"))
-        token = body['token']
+
+        token = req.COOKIES.get('token')
+        
         if not token:
             return request_failed(2, "Bad Token", status_code=400)
-        token_pair = TokenPair.objects.filter(token=token).first()
-        sender = token_pair.user
-        user_name = body["userName"]
-        sendee = User.objects.filter(name = user_name).first()
-        friend_request = FriendRequests(sender=sender, sendee=sendee)
-        friend_request.save()
-        return request_success()
-    
-    elif req.method == "DELETE":
-        token = req.COOKIES.get("token")
-        token_pair = TokenPair.objects.filter(token=token).first()
-        sender = token_pair.user
-        user_name = body["userName"]
-        sendee = User.objects.filter(name = user_name).first()
-        Contacts.objects.get(user=sender, friend=sendee).delete()
-        Contacts.objects.get(user=sendee, friend=sender).delete()
-        return request_success()
+        
+        user = TokenPair.objects.filter(token=token).first().user()
+        target = User.objects.filter(user_id=body['id'])
+
+        if (body['group'] != 'Request' and body['group'] != 'Stranger'):
+
+            request = FriendRequests.objects.filter(sendee=user, sender=target).first()
+            
+            if request:
+
+                new_friend = Contacts(user=target, friend=user, group = UserGroup.objects.get(user=sender, group_name = 'Default'))
+                new_friend_rev = Contacts(user=user, friend=target, group = UserGroup.objects.get(user=sendee, group_name = body['group']))
                 
+                new_friend.save()
+                new_friend_rev.save()
+                
+                request.delete()
+            
+            else:
+                contact = Contacts.objects.filter(user=user, friend=target).first()
+
+                if contact:
+                    contact.group = body['group']
+                    contact.save()
+                
+                else:
+                    return request_failed(2, "Haven't requested", status_code=400)
+
+        if (body['group'] == 'Request'):
+            friend_request = FriendRequests.objects.filter(sender=user, sendee=target).first()
+            if friend_request:
+                friend_request.delete()
+
+            friend_request = FriendRequests(sender=user, sendee=target)
+            friend_request.save()
+
+        if (body['group'] == 'Stranger'):
+            contact = Contacts.objects.filter(user=user, friend=target).first()
+            if not contact:
+                return request_failed(2, "not have thist friend", status_code=400)
+
+            Contacts.objects.get(user=user, friend=target).delete()
+            Contacts.objects.get(user=target, friend=user).delete()
+
+        return request_success()
+
     else:
         return BAD_METHOD
 
