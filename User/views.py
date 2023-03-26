@@ -29,7 +29,7 @@ def check_for_user_data(body):
     assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
     assert 5 <= len(password) <= 20, "Bad length of [password]"
     assert 1 <= len(nickname) <= 10, "Bad length of [nickname]"
-    assert 3 <= len(email) <= 20, "Bad length of [email]"
+    assert 3 <= len(email) <= 40, "Bad length of [email]"
 
     for i in range(0, len(user_name)):
         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
