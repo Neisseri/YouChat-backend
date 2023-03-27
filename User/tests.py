@@ -11,6 +11,9 @@ class UserTests(TestCase):
     def setUp(self):
         alice = User.objects.create(name = "swim", password = "abc1234567", 
                                     nickname = "Alice", email = "17@swim.com")
+        
+        bob = User.objects.create(name = "swim2", password = "abc12345678", 
+                                    nickname = "Bob", email = "11@swim.com")
 
     # Utility Functions
     def put_user(self, user_name, password, nickname, email):
@@ -50,13 +53,25 @@ class UserTests(TestCase):
         }
         return self.client.put("people/modify", data=payload, content_type="application/json")
     
-    # To do list: 
-    # /people/friends/{query}
-    # /people/friends
-    # /people/profile/{id}
-    # /people/email/send/{email}
-    # /people/email/verify/{veri_code}
-
+    def get_friends(self, query):
+        return self.client.get(f"people/friends/{query}")
+    
+    def put_friends(self, id, group):
+        payload = {
+            "id": id,
+            "group": group
+        }
+        return self.client.put(f"people/friends", data=payload, content_type="application/json")
+    
+    def get_profile(self, id):
+        return self.client.get(f"people/profile/{id}")
+    
+    def get_email_send(self, email):
+        return self.client.get(f"people/send/{email}")
+    
+    def get_email_verify(self, veri_code):
+        return self.client.get(f"people/verify/{veri_code}")
+    
     # Now start testcases.
 
     # user register

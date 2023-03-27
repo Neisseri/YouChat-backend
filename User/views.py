@@ -7,6 +7,7 @@ from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from utils.utils_time import get_timestamp
 from django.urls import path, re_path
 from django.core.mail import send_mail
+from django.db.models import Q
 import random
 
 veri_code: int
@@ -124,6 +125,7 @@ def user(req: HttpRequest):
         return request_success()
 
 # /friends view
+@CheckRequire
 def friends(req: HttpRequest, query: any):
     
     if req.method == "GET":
@@ -134,11 +136,13 @@ def friends(req: HttpRequest, query: any):
         
         user = TokenPair.objects.filter(token=token).first().user()
 
-        query_list = User.objects.filter(Q(name_contains=query) | Q(nickname_contains=query) | Q(email_contains=query))
+        query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query))
 
         contact_list = Contacts.objects.filter(user=user)
 
-        request_list = Contacts.objects.filter(sendee=user)
+        request_from_list = FriendRequests.objects.filter(sendee=user)
+
+        request_to_list = FriendRequests.objects.filter(sender=user)
 
         return_data = {
             "friendList": [
@@ -173,9 +177,9 @@ def friends(req: HttpRequest, query: any):
                         }
                     )
             else:
-                request = request_list.filter(sender=query_item).first()
-                if request:
-                    group_index = where_is_group("Request")
+                request_from = request_from_list.filter(sender=query_item).first()
+                if request_from:
+                    group_index = where_is_group("RequestFrom")
 
                     if group_index != -1:   #already exists in friendList
                         return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
@@ -183,23 +187,41 @@ def friends(req: HttpRequest, query: any):
                     else:
                         return_data["friendList"].append(
                             {
-                                "group": "Request", 
+                                "group": "RequestFrom", 
                                 "list": [return_field(query_item.serialize(), ["id", "nickname"])]
                             }
                         )
+                
                 else:
-                    group_index = where_is_group("Stranger")
-                    
-                    if group_index != -1:   #already exists in friendList
-                        return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
-                    
+
+                    request_to = request_to_list.filter(sendee=query_item).first()
+                    if request_to:
+                        group_index = where_is_group("RequestTo")
+
+                        if group_index != -1:   #already exists in friendList
+                            return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
+                        
+                        else:
+                            return_data["friendList"].append(
+                                {
+                                    "group": "RequestTo", 
+                                    "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                                }
+                            )
                     else:
-                        return_data["friendList"].append(
-                            {
-                                "group": "Stranger", 
-                                "list": [return_field(query_item.serialize(), ["id", "nickname"])]
-                            }
-                        )
+                        group_index = where_is_group("Stranger")
+                        
+                        if group_index != -1:   #already exists in friendList
+                            return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
+                        
+                        else:
+                            return_data["friendList"].append(
+                                {
+                                    "group": "Stranger", 
+                                    "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                                }
+                            )
+
 
         return request_success(return_data)
 
@@ -257,12 +279,16 @@ def friends(req: HttpRequest, query: any):
             friend_request.save()
 
         if (body['group'] == 'Stranger'):
-            contact = Contacts.objects.filter(user=user, friend=target).first()
-            if not contact:
-                return request_failed(2, "not have thist friend", status_code=400)
+            request = FriendRequests.objects.filter(sendee=user, sender=target).first()
+            if request:
+                request.delete()
+            else:
+                contact = Contacts.objects.filter(user=user, friend=target).first()
+                if not contact:
+                    return request_failed(2, "not have this friend", status_code=400)
 
-            Contacts.objects.get(user=user, friend=target).delete()
-            Contacts.objects.get(user=target, friend=user).delete()
+                Contacts.objects.get(user=user, friend=target).delete()
+                Contacts.objects.get(user=target, friend=user).delete()
 
         return request_success()
 
