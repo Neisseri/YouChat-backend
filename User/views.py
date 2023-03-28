@@ -27,10 +27,10 @@ def check_for_user_data(body):
     nickname = require(body, "nickname", "string", err_msg="Missing or error type of [nickname]")
     email = require(body, "email", "string", err_msg="Missing or error type of [email]")
 
-    assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
-    assert 5 <= len(password) <= 20, "Bad length of [password]"
-    assert 1 <= len(nickname) <= 10, "Bad length of [nickname]"
-    assert 3 <= len(email) <= 40, "Bad length of [email]"
+    assert 5 <= len(user_name) <= 20, ("Bad length of [userName]", 2)
+    assert 5 <= len(password) <= 20, ("Bad length of [password]", 2)
+    assert 1 <= len(nickname) <= 10, ("Bad length of [nickname]", 2)
+    assert 3 <= len(email) <= 40, ("Bad length of [email]", 2)
 
     for i in range(0, len(user_name)):
         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
