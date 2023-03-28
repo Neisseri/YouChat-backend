@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 import random
 
-veri_code: int
+email2vcode = []
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -295,6 +295,17 @@ def friends(req: HttpRequest, query: any):
     else:
         return BAD_METHOD
 
+# /people/modify/email view
+@CheckRequire
+def modify_email(req: HttpRequest):
+
+    if req.method == "POST":
+
+        body = json.loads(req.body.decode("utf-8"))
+        email = require(body, "email", "string", err_msg="Missing or error type of [email]")
+        veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
+
+        
 
 def generate_veri_code():
     # 6 digit verification code
@@ -308,10 +319,18 @@ def generate_veri_code():
 def email_send(req: HttpRequest, email):
 
     if req.method == "GET":
-        global veri_code
         veri_code = generate_veri_code()
-        # declare veri_code as a global variable
-
+        global email2vcode
+        email_existed = 0
+        for item in email2vcode:
+            if (email == item["email"]):
+                item["vcode"] = veri_code
+                email_existed = 1
+                break
+        if email_existed == 0:
+            email2vcode.append({"email": email, "vcode": veri_code})
+        # declare email2vcode as a global variable
+        
         mail_num = send_mail(
             'YouChat验证码',
             '欢迎您使用YouChat, 您的验证码为: ' + veri_code,
@@ -329,18 +348,21 @@ def email_verify(req: HttpRequest, v_code):
 
     if req.method == "GET":
 
-        global veri_code
-        if int(v_code) == int(veri_code):
+        global email2vcode
+        veri_succ = 0
+        for item in email2vcode:
+            if int(v_code) == int(item["vcode"]):
 
-            token = random.randint(1, 1000)
-            response = {
-                "code": 0,
-	            "info": "Login Success",
-	            "token": token
-            }
-            return request_success(response)
+                token = random.randint(1, 1000)
+                response = {
+                    "code": 0,
+                    "info": "Login Success",
+                    "token": token
+                }
+                veri_succ = 1
+                return request_success(response)
         
-        else:
+        if veri_succ == 0:
 
             return request_failed(code=2, info="Login Failure")
 
