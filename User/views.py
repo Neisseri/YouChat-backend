@@ -353,27 +353,32 @@ def email_send(req: HttpRequest, email):
             return request_failed(code=2, info="Email Not Existed or Sending Failure")
     
 # email/verify view
-def email_verify(req: HttpRequest, v_code):
+def email_verify(req: HttpRequest):
 
-    if req.method == "GET":
+    if req.method == "POST":
+
+        body = json.loads(req.body.decode("utf-8"))
+        email = require(body, "email", "string", err_msg="Missing or error type of [email]")
+        veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
 
         global email2vcode
-        veri_succ = 0
+
         for item in email2vcode:
-            if int(v_code) == int(item["vcode"]):
+            if email == item["email"]:
+                if veri_code == str(item["vcode"]):
 
-                token = random.randint(1, 1000)
-                response = {
-                    "code": 0,
-                    "info": "Login Success",
-                    "token": token
-                }
-                veri_succ = 1
-                return request_success(response)
-        
-        if veri_succ == 0:
+                    token = random.randint(1, 1000)
+                    user = User.objects.filter(email=email).first()
+                    tokenPair = TokenPair(user=user, token=token)
+                    tokenPair.save()
+                    response = {
+                        "code": 0,
+                        "info": "Login Success",
+                        "token": token
+                    }
+                    return request_success(response)
 
-            return request_failed(code=2, info="Login Failure")
+        return request_failed(code=2, info="Login Failure")
 
 def profile(req: HttpRequest, id: any):
 

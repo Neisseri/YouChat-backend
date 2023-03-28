@@ -246,3 +246,24 @@ class UserTests(TestCase):
             self.assertEqual(res.json()['code'], 2)
             self.assertEqual(res.json()['info'], "User Not Found")
             self.assertEqual(res.status_code, 400)
+
+    # user secondary login
+    def test_user_secondary_login(self):
+
+        random.seed(7)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+
+            res = self.post_modify(user_name, password)
+
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+            self.assertEqual(res.status_code, 200)
