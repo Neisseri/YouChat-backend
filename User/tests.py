@@ -170,6 +170,106 @@ class UserTests(TestCase):
         self.assertNotEqual(res.status_code, 200)
         self.assertJSONEqual(res.content, {"code": 8, "info": "User exists"})
 
+    # user login
+    def test_user_login(self):
+
+        random.seed(6)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+            
+            res = self.post_user(user_name, password)
+
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+            self.assertEqual(res.status_code, 200)
+
+    # user delete
+    def test_user_delete(self):
+
+        random.seed(6)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+            
+            res = self.delete_user(user_name, password)
+
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Success Deleted")
+            self.assertEqual(res.status_code, 200)
+
+    # user delete with incorrect password
+    def test_user_delete_with_incorrect_password(self):
+
+        random.seed(6)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+            
+            res = self.delete_user(user_name, "aaaaaaaaaa")
+
+            self.assertEqual(res.json()['code'], 2)
+            self.assertEqual(res.json()['info'], "Wrong Password")
+            self.assertEqual(res.status_code, 400)
+
+    # user delete without corresponding user
+    def test_user_delete_user_not_existed(self):
+
+        random.seed(6)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+
+            res = self.delete_user(user_name, password)
+
+            self.assertEqual(res.json()['code'], 2)
+            self.assertEqual(res.json()['info'], "User Not Found")
+            self.assertEqual(res.status_code, 400)
+
+    # user secondary login
+    def test_user_secondary_login(self):
+
+        random.seed(7)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+
+            res = self.post_modify(user_name, password)
+
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+            self.assertEqual(res.status_code, 200)
+
     def test_get_friends(self):
         res = self.post_user('swim17', 'abc1234567')
         self.assertEqual(res.status_code, 200)

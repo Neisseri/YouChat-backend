@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 import random
 
-veri_code: int
+email2vcode = []
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -27,10 +27,10 @@ def check_for_user_data(body):
     nickname = require(body, "nickname", "string", err_msg="Missing or error type of [nickname]")
     email = require(body, "email", "string", err_msg="Missing or error type of [email]")
 
-    assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
-    assert 5 <= len(password) <= 20, "Bad length of [password]"
-    assert 1 <= len(nickname) <= 10, "Bad length of [nickname]"
-    assert 3 <= len(email) <= 40, "Bad length of [email]"
+    assert 5 <= len(user_name) <= 20, ("Bad length of [userName]", 2)
+    assert 5 <= len(password) <= 20, ("Bad length of [password]", 2)
+    assert 1 <= len(nickname) <= 10, ("Bad length of [nickname]", 2)
+    assert 3 <= len(email) <= 40, ("Bad length of [email]", 2)
 
     for i in range(0, len(user_name)):
         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
@@ -315,6 +315,26 @@ def friends_put(req: HttpRequest):
     else:
         return BAD_METHOD
 
+# /people/modify/email view
+@CheckRequire
+def modify_email(req: HttpRequest):
+
+    if req.method == "POST":
+
+        body = json.loads(req.body.decode("utf-8"))
+        email = require(body, "email", "string", err_msg="Missing or error type of [email]")
+        veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
+
+        global email2vcode
+        for item in email2vcode:
+            if item["email"] == email:
+                if item["vcode"] == veri_code:
+                    return request_success()
+                else:
+                    return request_failed(2, "Wrong Verification code")
+        
+        return request_failed(2, "Email Not Found")
+        
 def generate_veri_code():
     # 6 digit verification code
     veri_code = ""
@@ -322,15 +342,74 @@ def generate_veri_code():
         veri_code += str(random.randint(0, 9))
     return veri_code
 
+# /modify
+@CheckRequire
+def modify(req: HttpRequest):
+
+    body = json.loads(req.body.decode('utf-8'))
+
+    if req.method == "POST":        
+        user_name, password= check_for_user_name_password(body)
+        
+        user = User.objects.filter(name=user_name).first()
+
+        if not user:
+            return request_failed(2, "User Not Found", status_code=400)
+
+        if user.password != password:
+            return request_failed(2, "Wrong Password", status_code=400)
+
+        return request_success()
+
+    elif req.method == "PUT":
+        
+        code = body["code"]
+        new = body["new"]
+        user_name = body["userName"]
+
+        user = User.objects.filter(name = user_name).first()
+
+        if code == 1:
+            if User.objects.filter(name = new).first():
+                return request_failed(2, "username exists", 400)
+            
+            user.name = new
+            user.save()
+
+        elif code == 2:
+            user.password = new
+            user.save()
+
+        elif code == 3:
+            # TODO:update photo
+            user.save()
+
+        elif code == 4:
+            user.email = new
+            user.save()
+
+        elif code == 5:
+            # TODO:update phone number
+            user.save()
+
+        return request_success()
 
 # /email/send view
 def email_send(req: HttpRequest, email):
 
     if req.method == "GET":
-        global veri_code
         veri_code = generate_veri_code()
-        # declare veri_code as a global variable
-
+        global email2vcode
+        email_existed = 0
+        for item in email2vcode:
+            if (email == item["email"]):
+                item["vcode"] = veri_code
+                email_existed = 1
+                break
+        if email_existed == 0:
+            email2vcode.append({"email": email, "vcode": veri_code})
+        # declare email2vcode as a global variable
+        
         mail_num = send_mail(
             'YouChat验证码',
             '欢迎您使用YouChat, 您的验证码为: ' + veri_code,
@@ -344,24 +423,32 @@ def email_send(req: HttpRequest, email):
             return request_failed(code=2, info="Email Not Existed or Sending Failure")
     
 # email/verify view
-def email_verify(req: HttpRequest, v_code):
+def email_verify(req: HttpRequest):
 
-    if req.method == "GET":
+    if req.method == "POST":
 
-        global veri_code
-        if int(v_code) == int(veri_code):
+        body = json.loads(req.body.decode("utf-8"))
+        email = require(body, "email", "string", err_msg="Missing or error type of [email]")
+        veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
 
-            token = random.randint(1, 1000)
-            response = {
-                "code": 0,
-	            "info": "Login Success",
-	            "token": token
-            }
-            return request_success(response)
-        
-        else:
+        global email2vcode
 
-            return request_failed(code=2, info="Login Failure")
+        for item in email2vcode:
+            if email == item["email"]:
+                if veri_code == str(item["vcode"]):
+
+                    token = random.randint(1, 1000)
+                    user = User.objects.filter(email=email).first()
+                    tokenPair = TokenPair(user=user, token=token)
+                    tokenPair.save()
+                    response = {
+                        "code": 0,
+                        "info": "Login Success",
+                        "token": token
+                    }
+                    return request_success(response)
+
+        return request_failed(code=2, info="Login Failure")
 
 def profile(req: HttpRequest, id: any):
 
