@@ -134,7 +134,12 @@ def friends(req: HttpRequest, query: any):
         if not token:
             return request_failed(2, "Bad Token", status_code=400)
         
-        user = TokenPair.objects.filter(token=token).first().user()
+        token_pair = TokenPair.objects.filter(token=token).first()
+
+        if not token_pair:
+            return request_failed(2, "Please login", status_code=400)
+        
+        user = token_pair.user
 
         query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query))
 
@@ -146,10 +151,7 @@ def friends(req: HttpRequest, query: any):
 
         return_data = {
             "friendList": [
-                {
-                    "group": "Default", 
-                    "list": []
-                }
+ 
             ]
         }
 
@@ -164,7 +166,7 @@ def friends(req: HttpRequest, query: any):
         for query_item in query_list:
             contact = contact_list.filter(friend=query_item).first()
             if contact:
-                group_index = where_is_group(contact.group)
+                group_index = where_is_group(contact.group.group_name)
                 
                 if group_index != -1:   #already exists in friendList
                     return_data["friendList"][group_index]['list'].append(return_field(query_item.serialize(), ["id", "nickname"]))
@@ -172,7 +174,7 @@ def friends(req: HttpRequest, query: any):
                 else:
                     return_data["friendList"].append(
                         {
-                            "group": contact.group, 
+                            "group": contact.group.group_name, 
                             "list": [return_field(query_item.serialize(), ["id", "nickname"])]
                         }
                     )
@@ -209,6 +211,9 @@ def friends(req: HttpRequest, query: any):
                                 }
                             )
                     else:
+                        if query_item == user:
+                            continue
+
                         group_index = where_is_group("Stranger")
                         
                         if group_index != -1:   #already exists in friendList
@@ -225,7 +230,11 @@ def friends(req: HttpRequest, query: any):
 
         return request_success(return_data)
 
-    elif req.method == "PUT":
+    else:
+        return BAD_METHOD
+    
+def friends_put(req: HttpRequest):
+    if req.method == "PUT":
         body = json.loads(req.body.decode("utf-8"))
 
         token = req.COOKIES.get('token')
@@ -233,8 +242,13 @@ def friends(req: HttpRequest, query: any):
         if not token:
             return request_failed(2, "Bad Token", status_code=400)
         
-        user = TokenPair.objects.filter(token=token).first().user()
-        target = User.objects.filter(user_id=body['id'])
+        token_pair = TokenPair.objects.filter(token=token).first()
+
+        if not token_pair:
+            return request_failed(2, "Please login", status_code=400)
+        
+        user = token_pair.user
+        target = User.objects.filter(user_id=body['id']).first()
 
         if (body['group'] != 'Request' and body['group'] != 'Stranger'):
 
@@ -264,7 +278,13 @@ def friends(req: HttpRequest, query: any):
                 contact = Contacts.objects.filter(user=user, friend=target).first()
 
                 if contact:
-                    contact.group = body['group']
+                    group = UserGroup.objects.filter(user=user, group_name = body['group'])
+
+                    if not group:
+                        user_group = UserGroup(user=user, group_name = body['group'])
+                        user_group.save()
+                        
+                    contact.group = user_group
                     contact.save()
                 
                 else:
@@ -294,7 +314,6 @@ def friends(req: HttpRequest, query: any):
 
     else:
         return BAD_METHOD
-
 
 def generate_veri_code():
     # 6 digit verification code

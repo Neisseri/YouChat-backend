@@ -9,10 +9,10 @@ class UserTests(TestCase):
     
     # Initializer
     def setUp(self):
-        alice = User.objects.create(name = "swim", password = "abc1234567", 
+        alice = User.objects.create(name = "swim17", password = "abc1234567", 
                                     nickname = "Alice", email = "17@swim.com")
         
-        bob = User.objects.create(name = "swim2", password = "abc12345678", 
+        bob = User.objects.create(name = "swim11", password = "abc12345678", 
                                     nickname = "Bob", email = "11@swim.com")
 
     # Utility Functions
@@ -51,26 +51,28 @@ class UserTests(TestCase):
             "code": code,
             "new": new
         }
-        return self.client.put("people/modify", data=payload, content_type="application/json")
+        return self.client.put("/people/modify", data=payload, content_type="application/json")
     
-    def get_friends(self, query):
-        return self.client.get(f"people/friends/{query}")
+    def get_friends(self, query, token_value):
+        self.client.cookies.load({"token": token_value})
+        return self.client.get(f"/people/friends/{query}")
     
-    def put_friends(self, id, group):
+    def put_friends(self, id, group, token_value):
+        self.client.cookies.load({"token": token_value})
         payload = {
             "id": id,
             "group": group
         }
-        return self.client.put(f"people/friends", data=payload, content_type="application/json")
+        return self.client.put(f"/people/friends", data=payload, content_type="application/json")
     
     def get_profile(self, id):
-        return self.client.get(f"people/profile/{id}")
+        return self.client.get(f"/people/profile/{id}")
     
     def get_email_send(self, email):
-        return self.client.get(f"people/send/{email}")
+        return self.client.get(f"/people/send/{email}")
     
     def get_email_verify(self, veri_code):
-        return self.client.get(f"people/verify/{veri_code}")
+        return self.client.get(f"/people/verify/{veri_code}")
     
     # Now start testcases.
 
@@ -167,3 +169,39 @@ class UserTests(TestCase):
 
         self.assertNotEqual(res.status_code, 200)
         self.assertJSONEqual(res.content, {"code": 8, "info": "User exists"})
+
+    def test_get_friends(self):
+        res = self.post_user('swim17', 'abc1234567')
+        self.assertEqual(res.status_code, 200)
+        token = res.json()["token"]
+        res = self.get_friends("Bob", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed", 
+            "friendList": [
+                {
+                "group": "Stranger",
+                "list": [
+                        {
+                            "id": 2,
+                            "nickname": "Bob",
+                        }
+                    ]
+		        },
+            ]})
+        
+    def test_request_accept_delete_friends(self):
+        res = self.post_user('swim17', 'abc1234567')
+        self.assertEqual(res.status_code, 200)
+        token = res.json()["token"]
+        
+        res = self.put_friends(2, "Request", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+        
+        res = self.post_user('swim11', 'abc12345678')
+        self.assertEqual(res.status_code, 200)
+        token = res.json()["token"]
+
+        res = self.put_friends(1, "Default", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+
+        res = self.put_friends(1, "Stranger", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
