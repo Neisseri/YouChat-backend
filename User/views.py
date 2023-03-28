@@ -314,6 +314,57 @@ def generate_veri_code():
         veri_code += str(random.randint(0, 9))
     return veri_code
 
+# /modify
+@CheckRequire
+def modify(req: HttpRequest):
+
+    body = json.loads(req.body.decode('utf-8'))
+
+    if req.method == "POST":        
+        user_name, password= check_for_user_name_password(body)
+        
+        user = User.objects.filter(name=user_name).first()
+
+        if not user:
+            return request_failed(2, "User Not Found", status_code=400)
+
+        if user.password != password:
+            return request_failed(2, "Wrong Password", status_code=400)
+
+        return request_success()
+
+    elif req.method == "PUT":
+        
+        code = body["code"]
+        new = body["new"]
+        user_name = body["userName"]
+
+        user = User.objects.filter(name = user_name).first()
+
+        if code == 1:
+            if User.objects.filter(name = new).first():
+                return request_failed(2, "username exists", 400)
+            
+            user.name = new
+            user.save()
+
+        elif code == 2:
+            user.password = new
+            user.save()
+
+        elif code == 3:
+            # TODO:update photo
+            user.save()
+
+        elif code == 4:
+            user.email = new
+            user.save()
+
+        elif code == 5:
+            # TODO:update phone number
+            user.save()
+
+        return request_success()
 
 # /email/send view
 def email_send(req: HttpRequest, email):

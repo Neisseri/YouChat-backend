@@ -6,5 +6,7 @@ urlpatterns = [
     path('friends/<query>', views.friends),
     path('email/send/<email>', views.email_send),
     path('email/verify/<v_code>', views.email_verify),
-    path('profile/<id>', views.profile)
+    path('profile/<id>', views.profile),
+    path('modify/email', views.modify_email),
+    path('modify', views.modify)
 ]
