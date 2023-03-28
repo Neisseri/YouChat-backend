@@ -305,6 +305,15 @@ def modify_email(req: HttpRequest):
         email = require(body, "email", "string", err_msg="Missing or error type of [email]")
         veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
 
+        global email2vcode
+        for item in email2vcode:
+            if item["email"] == email:
+                if item["vcode"] == veri_code:
+                    return request_success()
+                else:
+                    return request_failed(2, "Wrong Verification code")
+        
+        return request_failed(2, "Email Not Found")
         
 
 def generate_veri_code():
