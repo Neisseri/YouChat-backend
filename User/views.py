@@ -255,7 +255,7 @@ def friends_put(req: HttpRequest):
         user = token_pair.user
         target = User.objects.filter(user_id=body['id']).first()
 
-        if (body['group'] != 'Request' and body['group'] != 'Stranger'):
+        if (body['group'] != 'RequestTo' and body['group'] != 'Stranger'):
 
             request = FriendRequests.objects.filter(sendee=user, sender=target).first()
             
@@ -295,7 +295,7 @@ def friends_put(req: HttpRequest):
                 else:
                     return request_failed(2, "Haven't requested", status_code=400)
 
-        if (body['group'] == 'Request'):
+        if (body['group'] == 'RequestTo'):
             friend_request = FriendRequests.objects.filter(sender=user, sendee=target).first()
             if friend_request:
                 friend_request.delete()
