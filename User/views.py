@@ -141,7 +141,7 @@ def friends(req: HttpRequest, query: any):
         
         user = token_pair.user
 
-        query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query))
+        query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query)) if query != '#' else User.objects.all()
 
         contact_list = Contacts.objects.filter(user=user)
 
@@ -213,6 +213,9 @@ def friends(req: HttpRequest, query: any):
                     else:
                         if query_item == user:
                             continue
+                        
+                        if query == '#':
+                            continue
 
                         group_index = where_is_group("Stranger")
                         
@@ -233,6 +236,8 @@ def friends(req: HttpRequest, query: any):
     else:
         return BAD_METHOD
     
+
+@CheckRequire
 def friends_put(req: HttpRequest):
     if req.method == "PUT":
         body = json.loads(req.body.decode("utf-8"))
@@ -450,30 +455,51 @@ def email_verify(req: HttpRequest):
 
         return request_failed(code=2, info="Login Failure")
 
+@CheckRequire
 def profile(req: HttpRequest, id: any):
 
-    token = req.COOKIES.get('token')
+    if req.method == "GET":
+        token = req.COOKIES.get('token')
+                
+        if not token:
+            return request_failed(2, "Bad Token", status_code=400)
         
-    if not token:
-        return request_failed(2, "Bad Token", status_code=400)
-    
-    user = TokenPair.objects.filter(token=token).first().user()
-    target = User.objects.filter(user_id=id).first()
+        token_pair = TokenPair.objects.filter(token=token).first()
 
-    return_data = {
-            "profile": return_field(target.serialize(), ["id", "nickname", "username", "email"])
-        }
-    
-    contact = Contacts.objects.filter(user=user, friend=target).first()
-    if contact:
-        return_data["profile"]['group'] = contact.group
+        if not token_pair:
+            return request_failed(2, "Please login", status_code=400)
+        
+        user = token_pair.user
+
+        target = User.objects.filter(user_id=id).first()
+        if not target:
+            return request_failed(2, "UserId Not Existed", status_code=400)
+
+        return_data = {
+                "profile": return_field(target.serialize(), ["id", "nickname", "username", "email"])
+            }
+        
+        if user == target:
+            return_data["profile"]['group'] = "Myself"
+
+        else:
+            contact = Contacts.objects.filter(user=user, friend=target).first()
+            if contact:
+                return_data["profile"]['group'] = contact.group.group_name
+            
+            else:
+                request_from = FriendRequests.objects.filter(sendee=user, sender=target).first()
+                if request_from:
+                    return_data["profile"]['group'] = "RequestFrom"
+                else:
+                    request_to = FriendRequests.objects.filter(sendee=target, sender=user).first()
+                    if request_to:
+                        return_data["profile"]['group'] = "RequestTo"
+                    
+                    else:
+                        return_data["profile"]['group'] = "Stranger"
+        
+        return request_success(return_data)
     
     else:
-        request = FriendRequests.objects.filter(sendee=user, sender=target).first()
-        if request:
-            return_data["profile"]['group'] = "Request"
-            
-        else:
-            return_data["profile"]['group'] = "Stranger"
-    
-    return request_success(return_data)
+        return BAD_METHOD
