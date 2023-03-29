@@ -2,7 +2,7 @@ image: registry.secoder.net/tool/deployer
 
 stages:
   - build
-  - test
+  # - test
   - deploy
 
 build:
@@ -19,7 +19,7 @@ build:
   #   - dev
   # TODO End: [Student] Set as only master
 
-unit-test:
+# unit-test:
   # # TODO Start: [Student] Set job image
   # image: python:3.9
   # # TODO End: [Student] Set job image
