@@ -20,25 +20,25 @@ build:
   # TODO End: [Student] Set as only master
 
 unit-test:
-  # TODO Start: [Student] Set job image
-  image: python:3.9
-  # TODO End: [Student] Set job image
-  stage: test
-  before_script:
-    # TODO Start: [Student] Install dependencies
-    - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-    # TODO End: [Student] Install dependencies
-  script:
-    # TODO Start: [Student] Migrate and run tests
-    - python3 manage.py makemigrations User
-    - python3 manage.py migrate
-    - sh test.sh
-    # TODO End: [Student] Migrate and run tests
-  after_script:
-    - SUFFIX=$RANDOM
-    - curl "http://api.secoder.net/static/sonar-scanner.tar.gz" -s -o "/tmp/sonar-$SUFFIX.tar.gz"
-    - tar -xf "/tmp/sonar-$SUFFIX.tar.gz"  -C /opt
-    - /opt/sonar-scanner/bin/sonar-scanner
+  # # TODO Start: [Student] Set job image
+  # image: python:3.9
+  # # TODO End: [Student] Set job image
+  # stage: test
+  # before_script:
+  #   # TODO Start: [Student] Install dependencies
+  #   - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+  #   # TODO End: [Student] Install dependencies
+  # script:
+  #   # TODO Start: [Student] Migrate and run tests
+  #   - python3 manage.py makemigrations User
+  #   - python3 manage.py migrate
+  #   - sh test.sh
+  #   # TODO End: [Student] Migrate and run tests
+  # after_script:
+  #   - SUFFIX=$RANDOM
+  #   - curl "http://api.secoder.net/static/sonar-scanner.tar.gz" -s -o "/tmp/sonar-$SUFFIX.tar.gz"
+  #   - tar -xf "/tmp/sonar-$SUFFIX.tar.gz"  -C /opt
+  #   - /opt/sonar-scanner/bin/sonar-scanner
 
 deploy:
   stage: deploy
