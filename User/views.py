@@ -84,7 +84,7 @@ def user(req: HttpRequest):
         tokenPair = TokenPair(user=user, token=token)
         tokenPair.save()
 
-        return request_success({"token":token})
+        return request_success({"token":token, "id": user.user_id})
         
     
     elif req.method == "PUT":
@@ -104,7 +104,7 @@ def user(req: HttpRequest):
         tokenPair = TokenPair(user=user, token=token)
         tokenPair.save()
 
-        return request_success({"token":token})
+        return request_success({"token":token, "id": user.user_id})
 
     elif req.method == "DELETE":
         user_name, password= check_for_user_name_password(body)
@@ -370,9 +370,18 @@ def modify(req: HttpRequest):
         
         code = body["code"]
         new = body["new"]
-        user_name = body["userName"]
 
-        user = User.objects.filter(name = user_name).first()
+        token = req.COOKIES.get('token')
+        
+        if not token:
+            return request_failed(2, "Bad Token", status_code=400)
+        
+        token_pair = TokenPair.objects.filter(token=token).first()
+
+        if not token_pair:
+            return request_failed(2, "Please login", status_code=400)
+        
+        user = token_pair.user
 
         if code == 1:
             if User.objects.filter(name = new).first():
