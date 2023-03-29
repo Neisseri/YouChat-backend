@@ -141,7 +141,7 @@ def friends(req: HttpRequest, query: any):
         
         user = token_pair.user
 
-        query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query)) if query != '#' else User.objects.all()
+        query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query)) if query != '*' else User.objects.all()
 
         contact_list = Contacts.objects.filter(user=user)
 
@@ -214,7 +214,7 @@ def friends(req: HttpRequest, query: any):
                         if query_item == user:
                             continue
                         
-                        if query == '#':
+                        if query == '*':
                             continue
 
                         group_index = where_is_group("Stranger")
