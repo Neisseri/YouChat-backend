@@ -14,9 +14,9 @@ build:
     - export BUILD_IMAGE_PASSWORD=$CI_REGISTRY_PASSWORD
     - deployer build
   # TODO Start: [Student] Set as only master
-  # only:
-  #   - master
-  #   - dev
+  only:
+    - master
+    - dev
   # TODO End: [Student] Set as only master
 
 # unit-test:
@@ -45,7 +45,7 @@ deploy:
   script:
     - deployer dyno replace $CI_PROJECT_NAME $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG $REGISTRY_USER $REGISTRY_PWD
   # TODO Start: [Student] Set as only master
-  # only:
-  #   - master
-  #   - dev
+  only:
+    - master
+    - dev
   # TODO End: [Student] Set as only master
