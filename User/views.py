@@ -9,6 +9,7 @@ from django.urls import path, re_path
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
+import time
 
 email2vcode = []
 
@@ -421,6 +422,8 @@ def email_send(req: HttpRequest, email):
             email2vcode.append({"email": email, "vcode": veri_code})
         # declare email2vcode as a global variable
         
+        time.sleep(5)
+        
         mail_num = send_mail(
             'YouChat验证码',
             '欢迎您使用YouChat, 您的验证码为: ' + veri_code,
@@ -442,6 +445,9 @@ def email_verify(req: HttpRequest):
         email = require(body, "email", "string", err_msg="Missing or error type of [email]")
         veri_code = require(body, "veri_code", "string", err_msg="Missing or error type of [veri_code]")
 
+        # for debug
+        # print(email)
+        # print(veri_code)
         global email2vcode
 
         for item in email2vcode:
@@ -454,7 +460,8 @@ def email_verify(req: HttpRequest):
                 response = {
                     "code": 0,
                     "info": "Login Success",
-                    "token": token
+                    "token": token,
+                    "id": user.user_id
                 }
                 return request_success(response)
 
