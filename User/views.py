@@ -332,11 +332,8 @@ def modify_email(req: HttpRequest):
 
         global email2vcode
         for item in email2vcode:
-            if item["email"] == email:
-                if item["vcode"] == veri_code:
-                    return request_success()
-                else:
-                    return request_failed(2, "Wrong Verification code")
+            if item["email"] == email and item["vcode"] == veri_code:
+                return request_success()
         
         return request_failed(2, "Email Not Found")
         
@@ -448,19 +445,18 @@ def email_verify(req: HttpRequest):
         global email2vcode
 
         for item in email2vcode:
-            if email == item["email"]:
-                if veri_code == str(item["vcode"]):
+            if email == item["email"] and veri_code == str(item["vcode"]):
 
-                    token = random.randint(1, 1000)
-                    user = User.objects.filter(email=email).first()
-                    tokenPair = TokenPair(user=user, token=token)
-                    tokenPair.save()
-                    response = {
-                        "code": 0,
-                        "info": "Login Success",
-                        "token": token
-                    }
-                    return request_success(response)
+                token = random.randint(1, 1000)
+                user = User.objects.filter(email=email).first()
+                tokenPair = TokenPair(user=user, token=token)
+                tokenPair.save()
+                response = {
+                    "code": 0,
+                    "info": "Login Success",
+                    "token": token
+                }
+                return request_success(response)
 
         return request_failed(code=2, info="Login Failure")
 
