@@ -20,22 +20,11 @@ class User(models.Model):
 
     def serialize(self):
         return {
-            "userId": self.user_id,
-			"nickname": self.nickname 
+            "id": self.user_id,
+			"nickname": self.nickname,
+            "username": self.name,
+		    "email": self.email,
         }
-
-    class Meta:
-        indexes = [models.Index(fields=["name"])]
-
-    def __str__(self) -> str:
-        return self.name
-
-
-
-class Group(models.Model):
-    group_id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
-    members = models.ManyToManyField(User, through='Membership')
 
     class Meta:
         indexes = [models.Index(fields=["name"])]
@@ -48,7 +37,7 @@ class Group(models.Model):
 class UserGroup(models.Model):
     group_id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    group_name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False, default='default')
+    group_name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False, default='Default')
 
     class Meta:
         unique_together = ['user', 'group_name']
@@ -86,13 +75,6 @@ class FriendRequests(models.Model):
         return f'{self.sender} sent a request to {self.sendee}'
     
 
-
-class Membership(models.Model):
-    group = models.ForeignKey(Group, related_name = 'groups', on_delete=models.CASCADE)
-    member = models.ForeignKey(User, related_name = 'members', on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return f'{self.member} belongs to {self.group}'
     
 class TokenPair(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
