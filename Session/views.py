@@ -165,3 +165,20 @@ def message(req: HttpRequest):
 
     else:
         return
+    
+@CheckRequire
+def withdraw_message(req: HttpRequest):
+
+    body = json.loads(req.body.decode("utf-8"))
+
+    if req.method == "POST":
+        return
+    
+    elif req.method == "PUT":
+        return
+
+    elif req.method == "DELETE":
+        return 
+
+    else:
+        return

@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -44,7 +45,8 @@ INSTALLED_APPS = [
 
     #my apps
     "User",
-    "Session"
+    "Session",
+    "WebSocket"
 ]
 
 MIDDLEWARE = [
@@ -75,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "st_im_django.wsgi.application"
+ASGI_APPLICATION = 'st_im_django.routing.application'
 
 
 # Database
@@ -135,3 +137,12 @@ EMAIL_HOST = 'smtp.sina.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'swimchat@sina.com'
 EMAIL_HOST_PASSWORD = '8fcf93c3471c7b2c'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
