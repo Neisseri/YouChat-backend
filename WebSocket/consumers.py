@@ -4,12 +4,13 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 from User.models import User
-from Session.models import Session, UserAndSession
+from Session.models import Session, UserAndSession, Message
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class MyConsumer(AsyncWebsocketConsumer):
 
+    # user authority verification
     async def user_auth(self, id):
         user = User.objects.filter(user_id=id).first()
         sessions = UserAndSession.objects.filter(user=user).select_related('session')
@@ -20,6 +21,20 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_add(room_group_name)
         
         response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
+        await self.send(text_data=json.dumps(response_data))
+
+    # pull message from specific session
+    async def message_pull(self, session_id, message_scale):
+        session = Session.objects.filter(session_id).first()
+        messages = Message.objects.filter(session=session).order_by("-time")[:message_scale]
+        response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
+        for message in messages:
+            message_data = {
+                "senderId": message.sender.user_id,
+                "timestamp": message.time,
+                "message": message.text
+            }
+            response_data["messages"].append(message_data)
         await self.send(text_data=json.dumps(response_data))
 
     async def connect(self):
@@ -43,6 +58,10 @@ class MyConsumer(AsyncWebsocketConsumer):
         if type == 'user_auth':
             id = text_data_json['id']
             self.user_auth(id)
+        elif type == 'pull':
+            session_id = text_data_json['sessionId']
+            message_scale = text_data_json['messageScale']
+            self.message_pull(session_id, message_scale)
 
         message = text_data_json["message"]
 

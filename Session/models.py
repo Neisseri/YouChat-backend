@@ -33,6 +33,7 @@ class Message(models.Model):
     text = models.CharField(max_length=MAX_MESSAGE_LENGTH, unique=True)
     time = models.FloatField(default=utils_time.get_timestamp)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         indexes = [models.Index(fields=["time"])]
