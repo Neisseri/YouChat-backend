@@ -150,11 +150,41 @@ def withdrow_message(req: HttpRequest):
         return
 
 @CheckRequire
-def message(req: HttpRequest):
+def message(req: HttpRequest, id: int):
 
     body = json.loads(req.body.decode("utf-8"))
 
-    if req.method == "POST":
+    if req.method == "GET":
+        user = User.objects.filter(user_id = id).first()
+        sessionsbond = UserAndSession.objects.filter(user = user)
+        
+        sessions = []
+        for bond in sessionsbond:
+            sessions.append(bond.session)
+
+        session_info = []
+        for session in sessions:
+            info = {}
+            info["sessionId"] = session.session_id
+            info["sessionName"] = session.name
+            info["isTop"] = session.isTop
+            info["isMute"] = session.isMute
+            
+            message = Message.objects.filter(session=session).order_by("-time").first()
+            info["timestamp"] = message.time
+            info["type"] = message.type
+            info["message"] = message.text
+
+            session_info.append(info)
+
+        def get_time(info):
+            return info["time"]
+        
+        session_info.sort(key=get_time)
+
+        return request_success(session_info)
+
+    elif req.method == "POST":
         return
     
     elif req.method == "PUT":

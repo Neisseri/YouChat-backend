@@ -11,6 +11,8 @@ class Session(models.Model):
     session_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
     host = models.ForeignKey(User, on_delete=models.CASCADE)
+    isTop = models.BooleanField()
+    isMute = models.BooleanField()
 
     class Meta:
         indexes = [models.Index(fields=["name"])]
@@ -34,6 +36,8 @@ class Message(models.Model):
     time = models.FloatField(default=utils_time.get_timestamp)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.IntegerField()
+
 
     class Meta:
         indexes = [models.Index(fields=["time"])]

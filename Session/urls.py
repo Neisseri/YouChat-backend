@@ -5,5 +5,5 @@ urlpatterns = [
     path('chatroom/Admin', views.manage_chatroom),
     path('chatroom', views.join_chatroom),
     path('message/withdraw', views.withdraw_message),
-    path('message', views.message)
+    path('message/<id>', views.message)
 ]
