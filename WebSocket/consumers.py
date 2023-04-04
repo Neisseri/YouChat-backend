@@ -8,12 +8,35 @@ from Session.models import Session, UserAndSession, Message
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from channels.db import database_sync_to_async
+
 class MyConsumer(AsyncWebsocketConsumer):
+
+    @database_sync_to_async
+    def get_user_by_id(self, id):
+        return User.objects.filter(user_id=id).first()
+
+    @database_sync_to_async
+    def get_sessions_by_user(self):
+        return UserAndSession.objects.filter(user=self.user).select_related('session')
+
+    @database_sync_to_async
+    def get_session_by_id(self, session_id):
+        return Session.objects.filter(session_id).first()
+    
+    @database_sync_to_async
+    def get_messages(self, session, message_scale):
+        return Message.objects.filter(session=session).order_by("-time")[:message_scale]
+
+    @database_sync_to_async
+    def add_message(self, text, timestamp, session, user):
+        return Message(text=text, time=timestamp, session=session, sender=user)
 
     # user authority verification
     async def user_auth(self, id):
-        user = User.objects.filter(user_id=id).first()
-        sessions = UserAndSession.objects.filter(user=user).select_related('session')
+
+        self.user = await self.get_user_by_id(id)
+        sessions = await self.get_sessions_by_user()
 
         for session in sessions:
             room_name = session.session.name
@@ -25,8 +48,9 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # pull message from specific session
     async def message_pull(self, session_id, message_scale):
-        session = Session.objects.filter(session_id).first()
-        messages = Message.objects.filter(session=session).order_by("-time")[:message_scale]
+
+        session = await self.get_session_by_id(session_id)
+        messages = await self.get_messages(session, message_scale)
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         for message in messages:
             message_data = {
@@ -37,6 +61,32 @@ class MyConsumer(AsyncWebsocketConsumer):
             response_data["messages"].append(message_data)
         await self.send(text_data=json.dumps(response_data))
 
+    # send message
+    async def send_message(self, session_id, timestamp, text):
+
+        session = await self.get_session_by_id(session_id)
+        message = await self.add_message(text, timestamp, session, self.user)
+
+        response = {
+	        "code": 0,
+	        "info": "Succeed",
+	        "type": "send",
+	        "sessionId": session_id,
+	        "senderId": self.user.user_id,
+	        "timestamp": timestamp,
+	        "messageId": message.message_id,
+	        "message": text 
+        }
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "chat_message", "message": response}
+        )
+
+
+
+
+
+    # start up websocket connection
     async def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["group"]
         self.room_group_name = "chat_%s" % self.room_name
@@ -46,6 +96,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+    # end websocket connection
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -62,13 +113,11 @@ class MyConsumer(AsyncWebsocketConsumer):
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
             self.message_pull(session_id, message_scale)
-
-        message = text_data_json["message"]
-
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat_message", "message": message}
-        )
+        elif type == 'send':
+            session_id = text_data_json['sessionId']
+            timestamp = text_data_json['timestamp']
+            text = text_data_json['message']
+            self.send_message(session_id, timestamp, text)
 
     # Receive message from room group
     async def chat_message(self, event):
