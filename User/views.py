@@ -23,27 +23,35 @@ def check_number_letter(c: any):
 # extract the fields in request.body for /user GET
 def check_for_user_data(body):
 
-    user_name = require(body, "userName", "string", err_msg="Missing or error type of [userName]")
-    password = require(body, "password", "string", err_msg="Missing or error type of [password]")
-    nickname = require(body, "nickname", "string", err_msg="Missing or error type of [nickname]")
-    email = require(body, "email", "string", err_msg="Missing or error type of [email]")
+    user_name = require(body, "userName", "string", err_msg="Missing or error type of [userName]",err_code=2)
+    password = require(body, "password", "string", err_msg="Missing or error type of [password]",err_code=2)
+    nickname = require(body, "nickname", "string", err_msg="Missing or error type of [nickname]",err_code=2)
+    email = require(body, "email", "string", err_msg="Missing or error type of [email]",err_code=2)
 
-    assert 5 <= len(user_name) <= 20, ("Bad length of [userName]", 2)
-    assert 5 <= len(password) <= 20, ("Bad length of [password]", 2)
-    assert 1 <= len(nickname) <= 10, ("Bad length of [nickname]", 2)
-    assert 3 <= len(email) <= 40, ("Bad length of [email]", 2)
+    if not 5 <= len(user_name) <= 20:
+        raise Exception("Bad length of [userName]", 2)
+    if not 5 <= len(password) <= 20:
+        raise Exception("Bad length of [password]", 2)
+    if not 1 <= len(nickname) <= 10:
+        raise Exception("Bad length of [nickname]", 2)
+    if not 3 <= len(email) <= 40:
+        raise Exception("Bad length of [email]", 2)
 
     for i in range(0, len(user_name)):
-        assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
+        if not (check_number_letter(user_name[i]) or user_name[i] == '_'):
+            raise Exception("Invalid char in [userName]", 2)
         
     for i in range(0, len(password)):
-        assert (check_number_letter(password[i]) or password[i] == '_' or password[i] == '*'), "Invalid char in [password]"
+        if not (check_number_letter(password[i]) or password[i] == '_' or password[i] == '*'):
+            raise Exception("Invalid char in [password]", 2)
 
     for i in range(0, len(nickname)):
-        assert (check_number_letter(nickname[i]) or nickname[i] == '_' or nickname[i] == '*'), "Invalid char in [nickname]"
+        if not (check_number_letter(nickname[i]) or nickname[i] == '_' or nickname[i] == '*'):
+            raise Exception("Invalid char in [nickname]", 2)
 
     for i in range(0, len(email)):
-        assert (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@'), "Invalid char in [email]"
+        if not (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@'):
+            raise Exception("Invalid char in [email]", 2)
 
     return user_name, password, nickname, email
 

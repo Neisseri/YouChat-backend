@@ -17,12 +17,19 @@ class UserTests(TestCase):
 
     # Utility Functions
     def put_user(self, user_name, password, nickname, email):
-        payload = {
-            "userName": user_name,
-            "password": password,
-            "nickname": nickname,
-            "email": email
-        }
+        if user_name:
+            payload = {
+                "userName": user_name,
+                "password": password,
+                "nickname": nickname,
+                "email": email
+            }
+        else :
+            payload = {
+                "password": password,
+                "nickname": nickname,
+                "email": email
+            }
         return self.client.put("/people/user", data=payload, content_type="application/json")
 
     def post_user(self, user_name, password):
@@ -46,8 +53,9 @@ class UserTests(TestCase):
         }
         return self.client.post("/people/modify", data=payload, content_type="application/json")
     
-    def put_modify(self, code, new):
+    def put_modify(self, user_name, code, new):
         payload = {
+            "userName": user_name,
             "code": code,
             "new": new
         }
@@ -109,7 +117,7 @@ class UserTests(TestCase):
         res = self.put_user(None, password, nickname, email)
             
         self.assertNotEqual(res.status_code, 200)
-        self.assertJSONEqual(res.content, {"code": 2, "info": "Missing or error type of userName"})
+        self.assertJSONEqual(res.content, {"code": 2, "info": "Missing or error type of [userName]"})
         self.assertFalse(User.objects.filter(password=password).exists())
     
     # `password` key length incorrect
@@ -126,7 +134,7 @@ class UserTests(TestCase):
         res = self.put_user(user_name, password, nickname, email)
 
         self.assertNotEqual(res.status_code, 200)
-        self.assertJSONEqual(res.content, {"code": 2, "info": "Bad length of password"})
+        self.assertJSONEqual(res.content, {"code": 2, "info": "Bad length of [password]"})
         self.assertFalse(User.objects.filter(name=user_name).exists())
 
     # `nickname` key with invalid char
@@ -145,7 +153,7 @@ class UserTests(TestCase):
             res = self.put_user(user_name, password, nickname, email)
 
             self.assertNotEqual(res.status_code, 200)
-            self.assertJSONEqual(res.content, {"code": 2, "info": "Invalid char in nickname"})
+            self.assertJSONEqual(res.content, {"code": 2, "info": "Invalid char in [nickname]"})
             self.assertFalse(User.objects.filter(name=user_name).exists())
 
     # `userName` key points to existing user
@@ -158,12 +166,12 @@ class UserTests(TestCase):
         em_len = random.randint(3, 40)
         user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
         password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
-        nickname = ''.join([random.choice("?><@#$%^&") for _ in range(nn_len)])
+        nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
         email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
         self.put_user(user_name, password, nickname, email)
 
         password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
-        nickname = ''.join([random.choice("?><@#$%^&") for _ in range(nn_len)])
+        nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
         email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
         res = self.put_user(user_name, password, nickname, email)
 
@@ -270,6 +278,46 @@ class UserTests(TestCase):
             self.assertEqual(res.json()['info'], "Succeed")
             self.assertEqual(res.status_code, 200)
 
+    def test_put_modify(self):
+
+        random.seed(7)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            self.put_user(user_name, password, nickname, email)
+
+            login = self.post_user(user_name, password)
+
+            token = login.json()["token"]
+            self.client.cookies["token"] = str(token)
+
+            # user name
+            new_user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            res = self.put_modify(user_name, 1, new_user_name)
+            
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+
+            # password
+            new_password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            res = self.put_modify(user_name, 2, new_password)
+            
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+
+            # email
+            new_email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            res = self.put_modify(user_name, 4, new_email)
+            
+            self.assertEqual(res.json()['code'], 0)
+            self.assertEqual(res.json()['info'], "Succeed")
+
     def test_get_friends(self):
         res = self.post_user('swim17', 'abc1234567')
         self.assertEqual(res.status_code, 200)
@@ -293,7 +341,7 @@ class UserTests(TestCase):
         self.assertEqual(res.status_code, 200)
         token = res.json()["token"]
         
-        res = self.put_friends(2, "Request", token)
+        res = self.put_friends(2, "RequestTo", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
         
         res = self.post_user('swim11', 'abc12345678')
