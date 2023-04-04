@@ -1,0 +1,36 @@
+Arguments: 
+  /home/tyt/workspace/node-v18.14.2-linux-x64/bin/node /home/tyt/workspace/node-v18.14.2-linux-x64/bin/yarn add daphne
+
+PATH: 
+  /home/tyt/workspace/node-v18.14.2-linux-x64/bin:/home/tyt/miniconda3/bin/conda:/home/tyt/.vscode-server/bin/7f329fe6c66b0f86ae1574c2911b681ad5a45d63/bin/remote-cli:/home/tyt/.cargo/bin:/home/tyt/workspace/node-v18.14.2-linux-x64/bin:/home/tyt/miniconda3/bin:/home/tyt/miniconda3/condabin:/home/tyt/miniconda3/bin/conda:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Windows/System32/OpenSSH:/mnt/d/programmar/Git/cmd:/mnt/c/Program Files (x86)/Pulse Secure/VC142.CRT/X64:/mnt/c/Program Files (x86)/Pulse Secure/VC142.CRT/X86:/mnt/d/nodejs:/mnt/d/texlive/2022/bin/win32:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/d/miniconda3:/mnt/d/miniconda3/Library/mingw-w64/bin:/mnt/d/miniconda3/Library/usr/bin:/mnt/d/miniconda3/Library/bin:/mnt/d/miniconda3/Scripts:/mnt/d/MiniConda:/mnt/d/MiniConda/Library/mingw-w64/bin:/mnt/d/MiniConda/Library/usr/bin:/mnt/d/MiniConda/Library/bin:/mnt/d/MiniConda/Scripts:/mnt/c/Users/11656/.cargo/bin:/mnt/d/Python/Scripts:/mnt/d/Python:/mnt/c/Users/11656/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/11656/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/MinGW/bin:/mnt/d/programmar/mingw/mingw64/bin:/mnt/d/PyCharm Community Edition 2022.1/bin:/mnt/d/PyCharm 2022.2.2/bin:/mnt/c/Users/11656/AppData/Roaming/npm:/mnt/d/intelFPGA_lite/19.1/modelsim_ase/win32aloem:/snap/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.14.2
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/daphne: Not found
+      at params.callback [as _callback] (/home/tyt/workspace/node-v18.14.2-linux-x64/lib/node_modules/yarn/lib/cli.js:66145:18)
+      at self.callback (/home/tyt/workspace/node-v18.14.2-linux-x64/lib/node_modules/yarn/lib/cli.js:140890:22)
+      at Request.emit (node:events:513:28)
+      at Request.<anonymous> (/home/tyt/workspace/node-v18.14.2-linux-x64/lib/node_modules/yarn/lib/cli.js:141862:10)
+      at Request.emit (node:events:513:28)
+      at IncomingMessage.<anonymous> (/home/tyt/workspace/node-v18.14.2-linux-x64/lib/node_modules/yarn/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:627:28)
+      at IncomingMessage.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
