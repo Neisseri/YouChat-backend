@@ -32,6 +32,11 @@ class MyConsumer(AsyncWebsocketConsumer):
     def add_message(self, text, timestamp, session, user):
         return Message(text=text, time=timestamp, session=session, sender=user)
 
+    @database_sync_to_async
+    def delete_message(self, message_id):
+        message = Message['message_id']
+        message.delete()
+
     # user authority verification
     async def user_auth(self, id):
 
@@ -81,19 +86,10 @@ class MyConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "chat_message", "message": response}
         )
-
-
-
-
+        
 
     # start up websocket connection
     async def connect(self):
-        self.room_name = "demo"
-        self.room_group_name = "chat_%s" % self.room_name
-
-        # Join room group
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
         await self.accept()
 
     # end websocket connection
@@ -118,6 +114,16 @@ class MyConsumer(AsyncWebsocketConsumer):
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             self.send_message(session_id, timestamp, text)
+        elif type == 'delete':
+            message_id = text_data_json['messageId']
+            await self.delete_message(message_id)
+            response = {
+                "code": 0,
+                "info": "Succeed",
+                "type": "delete",
+                "messageId": 123
+            }
+            await self.send(text_data=json.dumps(response))
 
     # Receive message from room group
     async def chat_message(self, event):
