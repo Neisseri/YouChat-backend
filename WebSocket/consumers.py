@@ -59,6 +59,10 @@ class MyConsumer(AsyncWebsocketConsumer):
     async def user_auth(self, id):
 
         self.user = await self.get_user_by_id(id)
+        if not self.user:
+            response_data = {"code": 1, "info": "User Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
         self.user_id = id
         self.room_name_list = await self.get_sessions_by_user()
 
