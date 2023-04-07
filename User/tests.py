@@ -3,6 +3,9 @@ from django.test import TestCase, Client
 from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
 import json
 from django.http import HttpResponse, HttpRequest
+import zmail
+import time
+import logging
 
 # Create your tests here.
 class UserTests(TestCase):
@@ -38,7 +41,7 @@ class UserTests(TestCase):
             "password": password
         }
         return self.client.post("/people/user", data=payload, content_type="application/json")
-    
+
     def delete_user(self, user_name, password):
         payload = {
             "userName": user_name,
@@ -77,11 +80,15 @@ class UserTests(TestCase):
         return self.client.get(f"/people/profile/{id}")
     
     def get_email_send(self, email):
-        return self.client.get(f"/people/send/{email}")
+        return self.client.get(f"/people/email/send/{email}")
     
-    def get_email_verify(self, veri_code):
-        return self.client.get(f"/people/verify/{veri_code}")
-    
+    def get_email_verify(self, email, veri_code):
+        payload = {
+            "email" : email,
+            "veri_code" : veri_code
+        }
+        return self.client.post(f"/people/email/verify", data=payload, content_type="application/json")
+
     # Now start testcases.
 
     # user register
@@ -212,12 +219,14 @@ class UserTests(TestCase):
             password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
             nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
             email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
-            self.put_user(user_name, password, nickname, email)
+            res = self.put_user(user_name, password, nickname, email)
             
+            self.assertEqual(res.json()['code'], 0)
+
             res = self.delete_user(user_name, password)
 
-            self.assertEqual(res.json()['code'], 0)
             self.assertEqual(res.json()['info'], "Success Deleted")
+            self.assertEqual(res.json()['code'], 0)
             self.assertEqual(res.status_code, 200)
 
     # user delete with incorrect password
@@ -336,6 +345,8 @@ class UserTests(TestCase):
 		        },
             ]})
         
+        res = self.get_friends("swim11", token)
+        
     def test_request_accept_delete_friends(self):
         res = self.post_user('swim17', 'abc1234567')
         self.assertEqual(res.status_code, 200)
@@ -351,5 +362,63 @@ class UserTests(TestCase):
         res = self.put_friends(1, "Default", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
 
+        res = self.get_friends("swim17", token)
+        self.assertEqual(res.status_code, 200)
+
+        res = self.put_friends(1, "MyGroup", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+
+        res = self.get_friends("swim17", token)
+        self.assertEqual(res.status_code, 200)
+
         res = self.put_friends(1, "Stranger", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+        
+        res = self.get_friends("swim17", token)
+        self.assertEqual(res.status_code, 200)
+
+
+
+    def test_email_send(self):
+        
+        em_len = random.randint(3, 40)
+        email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+        self.get_email_send(email)
+        
+    def test_email_verify(self):
+        email = 'swimchat@sina.com'
+        res = self.get_email_send(email)
+
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+
+        server = zmail.server('swimchat@sina.com', '8fcf93c3471c7b2c')
+        time.sleep(6)
+        
+        latest_mail = server.get_latest()
+        content = latest_mail["content_text"]
+
+        veri_code = "".join(list(filter(str.isdigit, list(content[0]))))
+
+        self.get_email_verify(email, veri_code)
+
+    def test_get_profile(self):
+
+        random.seed(7)
+        for _ in range(50):
+            un_len = random.randint(5, 20)
+            pw_len = random.randint(5, 20)
+            nn_len = random.randint(1, 10)
+            em_len = random.randint(3, 40)
+            user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+            password = ''.join([random.choice("qwertyuiopDFSBERFB123456789_*") for _ in range(pw_len)])
+            nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+            email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+            sign_up = self.put_user(user_name, password, nickname, email)
+            id = sign_up.json()["id"]
+
+            login = self.post_user(user_name, password)
+
+            token = login.json()["token"]
+            self.client.cookies["token"] = str(token)
+
+            self.get_profile(id)
