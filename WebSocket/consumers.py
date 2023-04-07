@@ -30,6 +30,8 @@ class MyConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_messages(self, session_id, message_scale):
         session = Session.objects.get(session_id=session_id)
+        if not session:
+            return None
         messages = Message.objects.filter(session=session).order_by("-time")[:message_scale]
         message_list = []
         for message in messages:
@@ -77,6 +79,13 @@ class MyConsumer(AsyncWebsocketConsumer):
     async def message_pull(self, session_id, message_scale):
 
         message_list = await self.get_messages(session_id, message_scale)
+        if not message_list:
+            response_data = {
+                "code": 1,
+                "info": "User Not Existed"
+            }
+            await self.send(text_data=json.dumps(response_data))
+            return
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         response_data["messages"] = message_list
         await self.send(text_data=json.dumps(response_data))
