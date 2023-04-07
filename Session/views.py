@@ -42,6 +42,8 @@ def manage_chatroom(req: HttpRequest):
     body = json.loads(req.body.decode("utf-8"))
 
     if req.method == "PUT":
+        user_name = body["userName"]
+        session_id = body["sessionId"]
         session = Session.objects.filter(session_id = session_id).first()
         user = User.objects.filter(name = user_name).first()
 
@@ -57,8 +59,8 @@ def manage_chatroom(req: HttpRequest):
         if not applicantUser:
             return request_failed(3, "Applicant Not Existed", 400)
         
-        manager_bond = UserAndSession.objects.filter(user = user, session = session)
-        applicant_bond = UserAndSession.objects.filter(user = applicantUser, session = session)
+        manager_bond = UserAndSession.objects.filter(user = user, session = session).first()
+        applicant_bond = UserAndSession.objects.filter(user = applicantUser, session = session).first()
 
         if not manager_bond or (manager_bond.permission != SESSION_HOST and manager_bond.permission != SESSION_MANAGER):
             return request_failed(1, "User Not Existed or Permission Denied", 400)
@@ -70,6 +72,7 @@ def manage_chatroom(req: HttpRequest):
             return request_failed(4, "Already In Session", 400)
 
         applicant_bond.permission = SESSION_MEMBER
+        applicant_bond.save()
 
         return request_success()
 
@@ -83,11 +86,12 @@ def join_chatroom(req: HttpRequest):
     user_name = req.GET.get("userName")
 
     if req.method == "POST":
+        user_name = body["userName"]
         session_name = body["sessionName"]
         session_id = body["sessionId"]
 
         session = Session.objects.filter(name = session_name, session_id = session_id).first()
-        user = User.objects.filter(name = user_name)
+        user = User.objects.filter(name = user_name).first()
 
         if not user:
             return request_failed(1, "User Not Existed", 400)
@@ -101,6 +105,7 @@ def join_chatroom(req: HttpRequest):
         return request_success()
     
     elif req.method == "PUT":
+        user_name = body["userName"]
         user = User.objects.filter(name = user_name).first()
 
         if not user:
@@ -117,7 +122,7 @@ def join_chatroom(req: HttpRequest):
     elif req.method == "DELETE":
         session_id = req.GET.get("sessionId")
         session = Session.objects.filter(session_id = session_id).first()
-        user = User.objects.filter(name = user_name)
+        user = User.objects.filter(name = user_name).first()
 
         if not user:
             return request_failed(1, "User Not Existed", 400)
