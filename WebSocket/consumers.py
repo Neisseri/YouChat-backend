@@ -8,6 +8,11 @@ from Session.models import Session, UserAndSession, Message
 
 from channels.db import database_sync_to_async
 
+import constants.session as constants
+
+import time
+import datetime
+
 class MyConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
@@ -27,6 +32,31 @@ class MyConsumer(AsyncWebsocketConsumer):
         message = Message.objects.filter(message_id=message_id).first()
         return message.session.session_id
     
+    @database_sync_to_async
+    def get_session(self, session_id):
+        session = Session.objects.get(session_id=session_id)
+        return session
+    
+    @database_sync_to_async
+    def get_message(self, message_id):
+        message = Message.objects.get(message_id = message_id)
+        return message
+    
+    @database_sync_to_async
+    def get_message_test(self, message):
+        text = message.text
+        return text
+    
+    @database_sync_to_async
+    def get_message_sender(self, message):
+        sender = message.sender
+        return sender
+    
+    @database_sync_to_async
+    def get_message_time(self, message):
+        time = message.time
+        return time
+
     @database_sync_to_async
     def get_messages(self, session_id, message_scale):
         session = Session.objects.get(session_id=session_id)
@@ -49,11 +79,16 @@ class MyConsumer(AsyncWebsocketConsumer):
         message.save()
         return message.message_id
 
-
     @database_sync_to_async
     def delete_message(self, message_id):
         message = Message.objects.filter(message_id=message_id).first()
         message.delete()
+
+    def check_invalid_message(self, text):
+        if len(text) < constants.MAX_MESSAGE_LENGTH:
+            return True
+        
+        return False
 
     # user authority verification
     async def user_auth(self, id):
@@ -76,6 +111,16 @@ class MyConsumer(AsyncWebsocketConsumer):
     # pull message from specific session
     async def message_pull(self, session_id, message_scale):
 
+        if not self.user:
+            response_data = {"code": 1, "info": "User Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        if not self.get_session(session_id):
+            response_data = {"code": 2, "info": "Session Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+
         message_list = await self.get_messages(session_id, message_scale)
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         response_data["messages"] = message_list
@@ -84,8 +129,23 @@ class MyConsumer(AsyncWebsocketConsumer):
     # send message
     async def send_message(self, session_id, timestamp, text):
 
-        message_id = await self.add_message(text, timestamp, session_id, self.user_id)
+        if not self.user:
+            response_data = {"code": 1, "info": "User Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        if not await self.get_session(session_id):
+            response_data = {"code": 2, "info": "Session Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        if await self.check_invalid_message(text):
+            response_data = {"code": 3, "info": "Message Invalid"}
+            await self.send(text_data=json.dumps(response_data))
+            return
 
+        message_id = await self.add_message(text, timestamp, session_id, self.user_id)
+        
         response = {
 	        "code": 0,
 	        "info": "Succeed",
@@ -105,6 +165,33 @@ class MyConsumer(AsyncWebsocketConsumer):
     async def group_delete_message(self, message_id):
 
         session_id = await self.get_session_id_by_message_id(message_id)
+        message = await self.get_message(message_id)
+        sender = await self.get_message_sender(message)
+        time = await self.get_message_time(message)
+
+        if not self.user:
+            response_data = {"code": 1, "info": "User Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        if not message:
+            response_data = {"code": 2, "info": "Message Not Existed"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        if sender != self.user:
+            response_data = {"code": 3, "info": "Permission Denied"}
+            await self.send(text_data=json.dumps(response_data))
+            return
+        
+        date1 = datetime.fromtimestamp(time)
+        date2 = datetime.datetime.now()
+        seconds = (date2 - date1).total_seconds()
+
+        if seconds > constants.WITHDRAW_TIME:
+            response_data = {"code": 4, "info": "Time Limit Exceeded"}
+            await self.send(text_data=json.dumps(response_data))
+            return
 
         response = {
 	        "code": 0,
@@ -154,40 +241,6 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.delete_message(message_id)
         else:
             raise RuntimeError
-
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event["message"]
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
-
-class ChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        # self.room_name = "demo"
-        # self.room_group_name = "chat_%s" % self.room_name
-
-        # # Join room group
-        # await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        # await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        pass
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-
-        await self.send(text_data=json.dumps({"message": message}))
-
-        # # Send message to room group
-        # await self.channel_layer.group_send(
-        #     self.room_group_name, {"type": "chat_message", "message": message}
-        # )
 
     # Receive message from room group
     async def chat_message(self, event):
