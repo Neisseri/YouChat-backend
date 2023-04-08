@@ -2,6 +2,8 @@
 /node_modules
 package.json
 package-lock.json
+yarn-error.log
+yarn.lock
 
 **/__pycache__/
 **/migrations/
