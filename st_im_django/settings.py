@@ -35,6 +35,12 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    #my apps
+    "User",
+    "Session",
+    "WebSocket",
+    "CSRF",
+
     "daphne",
     "channels",
     "django.contrib.admin",
@@ -44,10 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    #my apps
-    "User",
-    "Session",
-    "WebSocket"
+    
 ]
 
 MIDDLEWARE = [
@@ -146,7 +149,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("0.0.0.0", 6379)],
         },
     },
 }
