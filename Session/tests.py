@@ -53,7 +53,7 @@ class SessionTests(TestCase):
             "sessionId": session_id,
             "applicantName": applicant_name
         }
-        return self.client.post("/session/chatroom/Admin", data=payload, content_type="application/json")
+        return self.client.put("/session/chatroom/Admin", data=payload, content_type="application/json")
     
     # Now start testcases
 
@@ -128,12 +128,12 @@ class SessionTests(TestCase):
 
         random.seed(10)
         # Alice create chatroom
-        alice = User.objects.filter(name="swim17").first()
-        self.put_chatroom(alice.name, "chatroom")
-        chatroom = Session.objects.filter(name="chatroom").first()
+        alice = User.objects.filter(name='swim17').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
 
         # Bob join chatroom
-        bob = User.objects.filter(name="swim11").first()
+        bob = User.objects.filter(name='swim11').first()
         self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
 
         # Bob quit from the chatroom
@@ -141,3 +141,59 @@ class SessionTests(TestCase):
 
         self.assertEqual(res.json()['code'], 0)
         self.assertEqual(res.json()['info'], 'Succeed')
+
+    # quit from a chatroom with unexisted user
+    def test_delete_chatroom_user_unexisted(self):
+
+        random.seed(11)
+        # Alice create chatroom
+        alice = User.objects.filter(name='swim17').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
+
+        res = self.delete_chatroom("abaaba", chatroom.session_id)
+
+        self.assertEqual(res.json()['code'], 1)
+        self.assertEqual(res.json()['info'], 'User Not Existed')
+
+    # quit from a chatroom with unexisted session
+    def test_delete_chatroom_session_unexisted(self):
+
+        random.seed(12)
+        bob = User.objects.filter(name='swim11').first()
+        res = self.delete_chatroom(bob.name, 100000)
+
+        self.assertEqual(res.json()['code'], 2)
+        self.assertEqual(res.json()['info'], 'Session Not Existed')
+
+    # agree application for joining chatroom
+    def test_put_chatroom_admin(self):
+
+        random.seed(13)
+        alice = User.objects.filter(name='swim17').first()
+        bob = User.objects.filter(name='swim11').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
+
+        self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
+
+        res = self.put_chatroom_admin(alice.name, chatroom.session_id, bob.name)
+
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(res.json()['info'], 'Succeed')
+
+    # agree application for joining chatroom with Not-Admin
+    def test_put_chatroom_admin(self):
+
+        random.seed(14)
+        alice = User.objects.filter(name='swim17').first()
+        bob = User.objects.filter(name='swim11').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
+
+        self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
+
+        res = self.put_chatroom_admin(bob.name, chatroom.session_id, bob.name)
+
+        self.assertEqual(res.json()['code'], 1)
+        self.assertEqual(res.json()['info'], 'User Not Existed or Permission Denied')
