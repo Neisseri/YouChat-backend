@@ -12,7 +12,7 @@ import constants.session as constants
 import datetime
 
 class MyConsumer(AsyncWebsocketConsumer):
-
+    
     @database_sync_to_async
     def get_user_by_id(self, id):
         return User.objects.filter(user_id=id).first()
@@ -32,32 +32,32 @@ class MyConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def get_session(self, session_id):
-        session = Session.objects.get(session_id=session_id)
+        session = Session.objects.filter(session_id=session_id).first()
         return session
     
     @database_sync_to_async
     def get_message(self, message_id):
-        message = Message.objects.get(message_id = message_id)
+        message = Message.objects.filter(message_id = message_id).first()
         return message
     
     @database_sync_to_async
-    def get_message_test(self, message):
+    def get_message_test(self, message: Message):
         text = message.text
         return text
     
     @database_sync_to_async
-    def get_message_sender(self, message):
+    def get_message_sender(self, message: Message):
         sender = message.sender
         return sender
     
     @database_sync_to_async
-    def get_message_time(self, message):
+    def get_message_time(self, message: Message):
         time = message.time
         return time
 
     @database_sync_to_async
     def get_messages(self, session_id, message_scale):
-        session = Session.objects.get(session_id=session_id)
+        session = Session.objects.filter(session_id=session_id).first()
         if not session:
             return None
         messages = Message.objects.filter(session=session).order_by("-time")[:message_scale]
@@ -110,7 +110,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # pull message from specific session
     async def message_pull(self, session_id, message_scale):
-
+        
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
             await self.send(text_data=json.dumps(response_data))
@@ -122,13 +122,6 @@ class MyConsumer(AsyncWebsocketConsumer):
             return
 
         message_list = await self.get_messages(session_id, message_scale)
-        if not message_list:
-            response_data = {
-                "code": 1,
-                "info": "User Not Existed"
-            }
-            await self.send(text_data=json.dumps(response_data))
-            return
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         response_data["messages"] = message_list
         await self.send(text_data=json.dumps(response_data))
@@ -216,6 +209,10 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # start up websocket connection
     async def connect(self):
+        self.user = None
+        self.room_name_list = None
+        self.user_id = None
+
         await self.accept()
 
     # end websocket connection
