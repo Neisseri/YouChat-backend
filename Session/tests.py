@@ -16,10 +16,10 @@ class SessionTests(TestCase):
         
     # Utility Functions
     def get_image(self, user_id):
-        return self.client.get(f"/session/image/{user_id}", content_type="application/json")
+        return self.client.get(f"/session/image/{user_id}")
     
     def put_image(self, user_id):
-        return self.client.put(f"/session/image/{user_id}", content_type="application/json")
+        return self.client.put(f"/session/image/{user_id}")
     
     def get_message(self, user_id):
         return self.client.get(f"session/message/{user_id}", content_type="application/json")
@@ -75,4 +75,36 @@ class SessionTests(TestCase):
 
         self.assertEqual(res.json()['code'], 0)
         self.assertEqual(res.json()['info'], "Succeed")
-                           
+
+    # fetch messages for unexisted user
+    def test_get_messages_user_unexisted(self):
+
+        random.seed(4)
+        res = self.get_message(10000)
+
+        self.assertEqual(res.json()['code'], 2)
+        self.assertEqual(res.json()['info'], "Request failed")
+
+    # create chatroom
+    def test_put_chatroom(self):
+
+        random.seed(5)
+        alice = User.objects.filter(name="swim17").first()
+        res = self.put_chatroom(alice.name, "chatroom")
+
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(res.json()['info'], "Succeed")
+
+    # create chatroom for unexisted user
+    def test_put_chatroom_user_unexisted(self):
+
+        random.seed(6)
+        res = self.put_chatroom("abaaba", "chatroom")
+
+        self.assertEqual(res.json()['code'], 2)
+        self.assertEqual(res.json()['info'], "User Not Existed")
+
+    # add user to a specific chatroom
+    def test_post_chatroom(self):
+
+        random.seed(7)            
