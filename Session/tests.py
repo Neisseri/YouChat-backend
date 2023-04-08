@@ -18,4 +18,10 @@ class SessionTests(TestCase):
     def get_image(self, user_id):
         return self.client.get(f"/session/image/{user_id}", content_type="application/json")
     
+    def put_image(self, user_id):
+        return self.client.put(f"/session/image/{user_id}", content_type="application/json")
+    
+    def get_message(self, user_id):
+        return self.client.get(f"session/message/{user_id}", content_type="application/json")
+    
     
