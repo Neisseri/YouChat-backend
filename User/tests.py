@@ -354,10 +354,38 @@ class UserTests(TestCase):
         
         res = self.put_friends(2, "RequestTo", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+
+        res = self.get_friends("Bob", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed", 
+            "friendList": [
+                {
+                "group": "RequestTo",
+                "list": [
+                        {
+                            "id": 2,
+                            "nickname": "Bob",
+                        }
+                    ]
+		        },
+            ]})
         
         res = self.post_user('swim11', 'abc12345678')
         self.assertEqual(res.status_code, 200)
         token = res.json()["token"]
+
+        res = self.get_friends("Alice", token)
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed", 
+            "friendList": [
+                {
+                "group": "RequestFrom",
+                "list": [
+                        {
+                            "id": 1,
+                            "nickname": "Alice",
+                        }
+                    ]
+		        },
+            ]})
 
         res = self.put_friends(1, "Default", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
