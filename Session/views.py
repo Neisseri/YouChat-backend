@@ -37,13 +37,12 @@ def check_for_session_data(body):
 @CheckRequire
 def manage_chatroom(req: HttpRequest):
 
-    user_name = req.GET.get("userName")
-    session_id = req.GET.get("sessionId")
     body = json.loads(req.body.decode("utf-8"))
-
+    
     if req.method == "PUT":
-        user_name = body["userName"]
-        session_id = body["sessionId"]
+        user_name = body['userName']
+        session_id = body['sessionId']
+
         session = Session.objects.filter(session_id = session_id).first()
         user = User.objects.filter(name = user_name).first()
 
@@ -77,13 +76,12 @@ def manage_chatroom(req: HttpRequest):
         return request_success()
 
     else:
-        return request_success()
+        return request_failed(-1, 'Bad Method', 400)
 
 @CheckRequire
 def join_chatroom(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
-    user_name = req.GET.get("userName")
 
     if req.method == "POST":
         user_name = body["userName"]
@@ -120,7 +118,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
 
     elif req.method == "DELETE":
-        session_id = req.GET.get("sessionId")
+        session_id = body["sessionId"]
+        user_name = body["userName"]
         session = Session.objects.filter(session_id = session_id).first()
         user = User.objects.filter(name = user_name).first()
 
@@ -136,84 +135,3 @@ def join_chatroom(req: HttpRequest):
 
     else:
         return request_success()
-
-@CheckRequire
-def withdrow_message(req: HttpRequest):
-
-    body = json.loads(req.body.decode("utf-8"))
-
-    if req.method == "POST":
-        return
-    
-    elif req.method == "PUT":
-        return
-
-    elif req.method == "DELETE":
-        return 
-
-    else:
-        return
-
-@CheckRequire
-def message(req: HttpRequest, id: int):
-
-    body = json.loads(req.body.decode("utf-8"))
-
-    if req.method == "GET":
-        user = User.objects.filter(user_id = id).first()
-        sessionsbond = UserAndSession.objects.filter(user = user)
-        
-        sessions = []
-        for bond in sessionsbond:
-            sessions.append(bond.session)
-
-        session_info = []
-        for session in sessions:
-            info = {}
-            info["sessionId"] = session.session_id
-            info["sessionName"] = session.name
-            info["isTop"] = session.isTop
-            info["isMute"] = session.isMute
-            
-            message = Message.objects.filter(session=session).order_by("-time").first()
-            info["timestamp"] = message.time
-            info["type"] = message.type
-            info["message"] = message.text
-
-            session_info.append(info)
-
-        def get_time(info):
-            return info["time"]
-        
-        session_info.sort(key=get_time)
-
-        return request_success(session_info)
-
-    elif req.method == "POST":
-        return
-    
-    elif req.method == "PUT":
-        return
-
-    elif req.method == "DELETE":
-        return 
-
-    else:
-        return
-    
-@CheckRequire
-def withdraw_message(req: HttpRequest):
-
-    body = json.loads(req.body.decode("utf-8"))
-
-    if req.method == "POST":
-        return
-    
-    elif req.method == "PUT":
-        return
-
-    elif req.method == "DELETE":
-        return 
-
-    else:
-        return

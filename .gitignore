@@ -2,6 +2,8 @@
 /node_modules
 package.json
 package-lock.json
+yarn-error.log
+yarn.lock
 
 **/__pycache__/
 **/migrations/
@@ -11,3 +13,5 @@ db.sqlite3
 coverage-reports/
 xunit-reports/
 .pytest_cache/
+
+**/.DS_Store
