@@ -183,7 +183,7 @@ class SessionTests(TestCase):
         self.assertEqual(res.json()['info'], 'Succeed')
 
     # agree application for joining chatroom with Not-Admin
-    def test_put_chatroom_admin(self):
+    def test_put_chatroom_admin_not_admin(self):
 
         random.seed(14)
         alice = User.objects.filter(name='swim17').first()
@@ -197,3 +197,19 @@ class SessionTests(TestCase):
 
         self.assertEqual(res.json()['code'], 1)
         self.assertEqual(res.json()['info'], 'User Not Existed or Permission Denied')
+
+    # agree application for joining chatroom with unexisted session
+    def test_put_chatroom_admin_session_unexisted(self):
+
+        random.seed(15)
+        alice = User.objects.filter(name='swim17').first()
+        bob = User.objects.filter(name='swim11').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
+
+        self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
+
+        res = self.put_chatroom_admin(alice.name, 1000000, bob.name)
+
+        self.assertEqual(res.json()['code'], 2)
+        self.assertEqual(res.json()['info'], 'Session Not Existed')
