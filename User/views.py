@@ -1,16 +1,12 @@
 import json
 import random
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from utils.utils_request import BAD_METHOD, request_failed, request_success, return_field
 from utils.utils_require import CheckRequire, require
-from constants.user import MAX_CHAR_LENGTH
 from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
-from utils.utils_time import get_timestamp
-from django.urls import path, re_path
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
-import time
 
 email2vcode = []
 
@@ -430,8 +426,6 @@ def email_send(req: HttpRequest, email):
         if email_existed == 0:
             email2vcode.append({"email": email, "vcode": veri_code})
         # declare email2vcode as a global variable
-        
-        time.sleep(5)
         
         mail_num = send_mail(
             'YouChat验证码',
