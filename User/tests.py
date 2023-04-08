@@ -1,11 +1,8 @@
 import random
-from django.test import TestCase, Client
-from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
-import json
-from django.http import HttpResponse, HttpRequest
+from django.test import TestCase
+from User.models import User
 import zmail
 import time
-import logging
 
 # Create your tests here.
 class UserTests(TestCase):

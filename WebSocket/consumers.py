@@ -1,7 +1,6 @@
 import json
 
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
 from User.models import User
 from Session.models import Session, UserAndSession, Message
@@ -10,7 +9,6 @@ from channels.db import database_sync_to_async
 
 import constants.session as constants
 
-import time
 import datetime
 
 class MyConsumer(AsyncWebsocketConsumer):
