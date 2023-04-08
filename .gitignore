@@ -13,3 +13,5 @@ db.sqlite3
 coverage-reports/
 xunit-reports/
 .pytest_cache/
+
+**/.DS_Store
