@@ -83,7 +83,6 @@ def manage_chatroom(req: HttpRequest):
 def join_chatroom(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
-    user_name = req.GET.get("userName")
 
     if req.method == "POST":
         user_name = body["userName"]
@@ -120,7 +119,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
 
     elif req.method == "DELETE":
-        session_id = req.GET.get("sessionId")
+        session_id = body["sessionId"]
+        user_name = body["userName"]
         session = Session.objects.filter(session_id = session_id).first()
         user = User.objects.filter(name = user_name).first()
 
