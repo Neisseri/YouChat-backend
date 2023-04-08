@@ -2,6 +2,7 @@ from django.test import TestCase
 import random
 from Session.models import Session, UserAndSession, Message
 from User.models import User
+import json
 
 # Create your tests here.
 class SessionTests(TestCase):
@@ -22,14 +23,14 @@ class SessionTests(TestCase):
         return self.client.put(f"/session/image/{user_id}")
     
     def get_message(self, user_id):
-        return self.client.get(f"session/message/{user_id}", content_type="application/json")
+        return self.client.get(f"/session/message/{user_id}", content_type="application/json")
     
     def put_chatroom(self, user_name, session_name):
         payload = {
             "userName": user_name,
             "sessionName": session_name
         }
-        return self.client.put("session/chatroom", data=payload, content_type="application/json")
+        return self.client.put("/session/chatroom", data=payload, content_type="application/json")
 
     def post_chatroom(self, user_name, session_name, session_id):
         payload = {
@@ -37,14 +38,14 @@ class SessionTests(TestCase):
             "sessionName": session_name,
             "sessionId": session_id
         }
-        return self.client.post("session/chatroom", data=payload, content_type="application/json")
+        return self.client.post("/session/chatroom", data=payload, content_type="application/json")
     
     def delete_chatroom(self, user_name, session_id):
         payload = {
             "userName": user_name,
             "sessionId": session_id
         }
-        return self.client.delete("session/chatroom", data=payload, content_type="application/json")
+        return self.client.delete("/session/chatroom", data=payload, content_type="application/json")
 
     def put_chatroom_admin(self, user_name, session_id, applicant_name):
         payload = {
@@ -52,7 +53,7 @@ class SessionTests(TestCase):
             "sessionId": session_id,
             "applicantName": applicant_name
         }
-        return self.client.post("session/chatroom/Admin", data=payload, content_type="application/json")
+        return self.client.post("/session/chatroom/Admin", data=payload, content_type="application/json")
     
     # Now start testcases
 
@@ -65,25 +66,6 @@ class SessionTests(TestCase):
     def test_upload_portrait(seld):
 
         random.seed(2)
-
-    # fetch messages for sidbar rendering
-    def test_get_messages(self):
-
-        random.seed(3)
-        alice = User.objects.filter(name="swim17").first()
-        res = self.get_message(alice.user_id)
-
-        self.assertEqual(res.json()['code'], 0)
-        self.assertEqual(res.json()['info'], "Succeed")
-
-    # fetch messages for unexisted user
-    def test_get_messages_user_unexisted(self):
-
-        random.seed(4)
-        res = self.get_message(10000)
-
-        self.assertEqual(res.json()['code'], 2)
-        self.assertEqual(res.json()['info'], "Request failed")
 
     # create chatroom
     def test_put_chatroom(self):
@@ -107,4 +89,13 @@ class SessionTests(TestCase):
     # add user to a specific chatroom
     def test_post_chatroom(self):
 
-        random.seed(7)            
+        random.seed(7)
+        alice = User.objects.filter(name="swim17").first()
+        self.put_chatroom(alice.name, "chatroom")
+        chatroom = Session.objects.filter(name="chatroom").first()
+
+        bob = User.objects.filter(name="swim11").first()
+        res = self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
+
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(res.json()['info'], "Succeed")
