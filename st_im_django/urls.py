@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('people/', include("User.urls")),
-    path('session/', include("Session.urls"))
+    path('session/', include("Session.urls")),
+    path('csrf/', include("CSRF.urls"))
 ]
