@@ -213,3 +213,19 @@ class SessionTests(TestCase):
 
         self.assertEqual(res.json()['code'], 2)
         self.assertEqual(res.json()['info'], 'Session Not Existed')
+
+    # agree application for joining chatroom with unexisted applicant
+    def test_put_chatroom_admin_applicant_unexisted(self):
+
+        random.seed(16)
+        alice = User.objects.filter(name='swim17').first()
+        bob = User.objects.filter(name='swim11').first()
+        self.put_chatroom(alice.name, 'chatroom')
+        chatroom = Session.objects.filter(name='chatroom').first()
+
+        self.post_chatroom(bob.name, chatroom.name, chatroom.session_id)
+
+        res = self.put_chatroom_admin(alice.name, chatroom.session_id, 'abaaba')
+
+        self.assertEqual(res.json()['code'], 3)
+        self.assertEqual(res.json()['info'], 'Applicant Not Existed')
