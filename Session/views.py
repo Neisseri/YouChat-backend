@@ -7,6 +7,7 @@ from constants.session import SESSION_HOST, SESSION_MANAGER, SESSION_MEMBER, SES
 from User.models import User
 from utils.utils_request import request_failed, request_success, return_field
 import json
+import base64
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -135,3 +136,32 @@ def join_chatroom(req: HttpRequest):
 
     else:
         return request_success()
+
+@CheckRequire
+def transmit_img(req: HttpRequest, user_id):
+
+    # receive an image from front-end
+    if req.method == 'PUT':
+        user = User.objects.filter(user_id=user_id).first()
+        if not user:
+            response = {
+                'code': 2,
+                'info': 'Upload failed',
+            }
+            return HttpResponse(response)
+        body = json.loads(req.body.decode("utf-8"))
+        img = body['img']
+        user.portrait = base64.b64decode(img)
+        response = {
+            'code': 0,
+	        'info': 'Upload Success',
+        }
+        return HttpResponse(response)
+    
+    elif req.method == 'GET':
+        user = User.objects.filter(user_id=user_id).first()
+        img = user.portrait
+        response = {
+            'img': img
+        }
+        return HttpResponse(response)
