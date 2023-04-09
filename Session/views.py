@@ -137,6 +137,12 @@ def join_chatroom(req: HttpRequest):
         return request_success()
 
 @CheckRequire
-def transmit_img(req: HttpRequest):
+def transmit_img(req: HttpRequest, user_id):
+
+    # receive an image from front-end
+    if req.method == 'PUT':
+        user = User.objects.filter(user_id=user_id).first()
+        body = json.loads(req.body.decode("utf-8"))
+
 
     return request_success()
