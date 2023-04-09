@@ -154,4 +154,4 @@ CHANNEL_LAYERS = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://st-im-django-swimtogether.app.secoder.net/','https://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://st-im-django-swimtogether.app.secoder.net/','https://127.0.0.1:3000']
