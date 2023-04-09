@@ -153,3 +153,5 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+CSRF_TRUSTED_ORIGINS = ['https://localhost:3000']
