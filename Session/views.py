@@ -135,3 +135,8 @@ def join_chatroom(req: HttpRequest):
 
     else:
         return request_success()
+
+@CheckRequire
+def transmit_img(req: HttpRequest):
+
+    return request_success()
