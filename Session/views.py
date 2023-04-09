@@ -157,6 +157,11 @@ def transmit_img(req: HttpRequest, user_id):
 	        'info': 'Upload Success',
         }
         return HttpResponse(response)
-
-
-    return request_success()
+    
+    elif req.method == 'GET':
+        user = User.objects.filter(user_id=user_id).first()
+        img = user.portrait
+        response = {
+            'img': img
+        }
+        return HttpResponse(response)
