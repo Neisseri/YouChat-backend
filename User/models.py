@@ -11,13 +11,13 @@ class User(models.Model):
     user_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     nickname = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
-    password = models.CharField(max_length=MAX_CHAR_LENGTH, unique= False)
+    password = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
     register_time = models.FloatField(default=utils_time.get_timestamp)
     login_time = models.FloatField(default=utils_time.get_timestamp)
     email = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     friends = models.ManyToManyField('self', related_name='friends_backward', through='Contacts', symmetrical=False)
     friend_requests = models.ManyToManyField('self', related_name='friend_requests_backward', through='FriendRequests', symmetrical=False)
-    portrait = models.TextField()
+    portrait = models.TextField(max_length=MAX_CHAR_LENGTH)
 
     def serialize(self):
         return {
