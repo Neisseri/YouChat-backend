@@ -5,7 +5,7 @@ from constants.session import DEFAULT_MESSAGE_SCALE
 from Session.models import Session, UserAndSession, Message
 from constants.session import SESSION_HOST, SESSION_MANAGER, SESSION_MEMBER, SESSION_REQUEST
 from User.models import User
-from utils.utils_request import request_failed, request_success, return_field
+from utils.utils_request import request_failed, request_success, return_field, BAD_METHOD
 import json
 import base64
 
@@ -165,3 +165,41 @@ def transmit_img(req: HttpRequest, user_id):
             'img': img
         }
         return HttpResponse(response)
+    
+@CheckRequire
+def message(req: HttpRequest, id: int):
+
+    body = json.loads(req.body.decode("utf-8"))
+
+    if req.method == "GET":
+        user = User.objects.filter(user_id = id).first()
+        sessionsbond = UserAndSession.objects.filter(user = user)
+        
+        sessions = []
+        for bond in sessionsbond:
+            sessions.append(bond.session)
+
+        session_info = []
+        for session in sessions:
+            info = {}
+            info["sessionId"] = session.session_id
+            info["sessionName"] = session.name
+            info["isTop"] = session.isTop
+            info["isMute"] = session.isMute
+            
+            message = Message.objects.filter(session=session).order_by("-time").first()
+            info["timestamp"] = message.time
+            info["type"] = message.type
+            info["message"] = message.text
+
+            session_info.append(info)
+
+        def get_time(info):
+            return info["time"]
+        
+        session_info.sort(key=get_time)
+
+        return request_success(session_info)
+
+    else:
+        return BAD_METHOD
