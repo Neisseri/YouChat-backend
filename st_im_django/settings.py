@@ -36,10 +36,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     #my apps
-    "User",
-    "Session",
-    "WebSocket",
-    "CSRF",
+    
 
     "daphne",
     "channels",
@@ -49,6 +46,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    "User",
+    "Session",
+    "WebSocket",
+    "CSRF",
 
     
 ]
@@ -87,10 +89,24 @@ ASGI_APPLICATION = 'st_im_django.routing.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "data"/ "db.sqlite3",
+#     },
+#     'TEST': {
+#         'NAME': 'test',
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "data"/ "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': '66666666',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     },
     'TEST': {
         'NAME': 'test',
