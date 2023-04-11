@@ -116,7 +116,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        if not self.get_session(session_id):
+        if not await self.get_session(session_id):
             response_data = {"code": 2, "info": "Session Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
