@@ -325,6 +325,9 @@ class UserTests(TestCase):
             self.assertEqual(res.json()['info'], "Succeed")
 
     def test_get_friends(self):
+        res = self.post_user('swim11', 'abc12345678')
+        self.assertEqual(res.status_code, 200)
+        bob_id = res.json()['id']
         res = self.post_user('swim17', 'abc1234567')
         self.assertEqual(res.status_code, 200)
         token = res.json()["token"]
@@ -335,7 +338,7 @@ class UserTests(TestCase):
                 "group": "Stranger",
                 "list": [
                         {
-                            "id": 2,
+                            "id": bob_id,
                             "nickname": "Bob",
                         }
                     ]
@@ -345,11 +348,16 @@ class UserTests(TestCase):
         res = self.get_friends("swim11", token)
         
     def test_request_accept_delete_friends(self):
+        res = self.post_user('swim11', 'abc12345678')
+        self.assertEqual(res.status_code, 200)
+        bob_id = res.json()['id']
+
         res = self.post_user('swim17', 'abc1234567')
         self.assertEqual(res.status_code, 200)
+        alice_id = res.json()['id']
         token = res.json()["token"]
         
-        res = self.put_friends(2, "RequestTo", token)
+        res = self.put_friends(bob_id, "RequestTo", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
 
         res = self.get_friends("Bob", token)
@@ -359,7 +367,7 @@ class UserTests(TestCase):
                 "group": "RequestTo",
                 "list": [
                         {
-                            "id": 2,
+                            "id": bob_id,
                             "nickname": "Bob",
                         }
                     ]
@@ -377,26 +385,26 @@ class UserTests(TestCase):
                 "group": "RequestFrom",
                 "list": [
                         {
-                            "id": 1,
+                            "id": alice_id,
                             "nickname": "Alice",
                         }
                     ]
 		        },
             ]})
 
-        res = self.put_friends(1, "Default", token)
+        res = self.put_friends(alice_id, "Default", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
 
         res = self.get_friends("swim17", token)
         self.assertEqual(res.status_code, 200)
 
-        res = self.put_friends(1, "MyGroup", token)
+        res = self.put_friends(alice_id, "MyGroup", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
 
         res = self.get_friends("swim17", token)
         self.assertEqual(res.status_code, 200)
 
-        res = self.put_friends(1, "Stranger", token)
+        res = self.put_friends(alice_id, "Stranger", token)
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
         
         res = self.get_friends("swim17", token)
