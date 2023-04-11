@@ -17,7 +17,8 @@ class User(models.Model):
     email = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     friends = models.ManyToManyField('self', related_name='friends_backward', through='Contacts', symmetrical=False)
     friend_requests = models.ManyToManyField('self', related_name='friend_requests_backward', through='FriendRequests', symmetrical=False)
-    portrait = models.TextField(max_length=MAX_CHAR_LENGTH)
+    
+    # TODO: add head portrait field
 
     def serialize(self):
         return {
