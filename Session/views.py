@@ -189,6 +189,10 @@ def message(req: HttpRequest, id: int):
 
     if req.method == "GET":
         user = User.objects.filter(user_id = id).first()
+
+        if not user:
+            return request_failed(2, "UserId Not Exists", 400)
+
         sessionsbond = UserAndSession.objects.filter(user = user)
         
         sessions = []
