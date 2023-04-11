@@ -285,9 +285,9 @@ def friends_put(req: HttpRequest):
                 new_friend.save()
                 new_friend_rev.save()
                 
-                session = Session.objects.filter(name = "friend", host = user) #, friend_contacts = new_friend_rev, type = FRIEDN_SESSION)
+                session = Session.objects.filter(name = "friend", host = user, friend_contacts = new_friend_rev, type = FRIEDN_SESSION).first()
                 if not session:
-                    session = Session(name = "friend", host = user) #, friend_contacts = new_friend_rev, type = FRIEDN_SESSION)
+                    session = Session(name = "friend", host = user, friend_contacts = new_friend_rev, type = FRIEDN_SESSION)
                     session.save()
                     bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
                     bond.save()

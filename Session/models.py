@@ -13,8 +13,8 @@ class Session(models.Model):
 
     time = models.FloatField(default=utils_time.get_timestamp)
 
-    # type = models.IntegerField(default=2)
-    # friend_contacts = models.ForeignKey(Contacts, default=None, on_delete=models.CASCADE)
+    type = models.IntegerField(default=2)
+    friend_contacts = models.ForeignKey(Contacts, on_delete=models.CASCADE)
 
     host = models.ForeignKey(User, on_delete=models.CASCADE)
     isTop = models.BooleanField(default=False)
