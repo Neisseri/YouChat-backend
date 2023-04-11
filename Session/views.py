@@ -169,8 +169,6 @@ def transmit_img(req: HttpRequest, user_id):
 @CheckRequire
 def message(req: HttpRequest, id: int):
 
-    body = json.loads(req.body.decode("utf-8"))
-
     if req.method == "GET":
         user = User.objects.filter(user_id = id).first()
         sessionsbond = UserAndSession.objects.filter(user = user)
@@ -195,11 +193,11 @@ def message(req: HttpRequest, id: int):
             session_info.append(info)
 
         def get_time(info):
-            return info["time"]
+            return info["timestamp"]
         
         session_info.sort(key=get_time)
 
-        return request_success(session_info)
+        return request_success({"data": session_info})
 
     else:
         return BAD_METHOD
