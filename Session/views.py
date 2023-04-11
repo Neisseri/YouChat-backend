@@ -53,8 +53,8 @@ def manage_chatroom(req: HttpRequest):
         if not user:
             return request_failed(1, "User Not Existed or Permission Denied", 400)
         
-        applicantName = body["applicantName"]
-        applicantUser = User.objects.filter(name = applicantName).first()
+        applicantId = body["applicantId"]
+        applicantUser = User.objects.filter(user_id = applicantId).first()
 
         if not applicantUser:
             return request_failed(3, "Applicant Not Existed", 400)
@@ -190,7 +190,7 @@ def message(req: HttpRequest, id: int):
             info["sessionName"] = session.name
             info["isTop"] = session.isTop
             info["isMute"] = session.isMute
-            info["type"] = session.type
+            #info["sessionType"] = session.type
             
             message = Message.objects.filter(session=session).order_by("-time").first()
             info["timestamp"] = message.time
