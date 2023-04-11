@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from utils.utils_require import CheckRequire, require
-from constants.session import DEFAULT_MESSAGE_SCALE
+from constants.session import DEFAULT_MESSAGE_SCALE, BUILT_SESSION, FRIEDN_SESSION
 from Session.models import Session, UserAndSession, Message
 from constants.session import SESSION_HOST, SESSION_MANAGER, SESSION_MEMBER, SESSION_REQUEST
 from User.models import User
@@ -112,14 +112,16 @@ def join_chatroom(req: HttpRequest):
             return request_failed(2, "User Not Existed", 400)
 
         session_name = body["sessionName"]
-        session = Session(name = session_name, host = user)
+        session = Session(name = session_name, host = user) #, type = BUILT_SESSION)
         session.save()
         UserAndSession.objects.create(permission = SESSION_HOST, user = user, session = session)
 
 
         for id in initial_list:
             user = User.objects.get(user_id = id)
-            # UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
+            bond = UserAndSession.objects.filter(user = user, session = session)
+            if not bond:
+                UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
 
 
         return request_success()
@@ -192,10 +194,16 @@ def message(req: HttpRequest, id: int):
             info["isMute"] = session.isMute
             #info["sessionType"] = session.type
             
-            message = Message.objects.filter(session=session).order_by("-time").first()
-            info["timestamp"] = message.time
-            info["type"] = message.type
-            info["message"] = message.text
+            message = Message.objects.filter(session=session)
+            if message:
+                message = message.order_by("-time").first()
+                info["timestamp"] = message.time
+                info["type"] = message.type
+                info["message"] = message.text
+            else:
+                info["timestamp"] = session.time
+                info["type"] = "message"
+                info["message"] = ""
 
             session_info.append(info)
 
