@@ -331,6 +331,30 @@ def friends_put(req: HttpRequest):
                 Contacts.objects.get(user=target, friend=user).delete()
 
         return request_success()
+    
+    elif req.method == "GET":
+        id = req.GET.get("id")
+        user = User.objects.get(user_id = id)
+        
+        if not user:
+            return request_failed(2, "User Not Found", 400)
+        
+        contacts = Contacts.objects.filter(user = user)
+
+        friend_info = []
+
+        for contact in contacts:
+            info = {}
+            friend = contact.friend
+            info["id"] = friend.user_id
+            info["userName"] = friend.name
+
+            usergroup = contact.group
+            info["Group"] = usergroup.group_name
+
+            friend_info.append(info)
+
+        return request_success({"friend": friend_info})
 
     else:
         return BAD_METHOD
