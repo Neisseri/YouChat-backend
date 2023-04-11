@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from utils.utils_require import CheckRequire, require
-from constants.session import DEFAULT_MESSAGE_SCALE
+from constants.session import DEFAULT_MESSAGE_SCALE, BUILT_SESSION, FRIEDN_SESSION
 from Session.models import Session, UserAndSession, Message
 from constants.session import SESSION_HOST, SESSION_MANAGER, SESSION_MEMBER, SESSION_REQUEST
-from User.models import User
+from User.models import User, UserGroup, Contacts
 from utils.utils_request import request_failed, request_success, return_field, BAD_METHOD
 import json
 import base64
@@ -112,14 +112,26 @@ def join_chatroom(req: HttpRequest):
             return request_failed(2, "User Not Existed", 400)
 
         session_name = body["sessionName"]
-        session = Session(name = session_name, host = user)
+
+        group = UserGroup.objects.filter(user=user, group_name = "me").first()
+        if not group:
+            group = UserGroup(user=user, group_name = "me")
+            group.save()
+        contacts = Contacts.objects.filter(user=user, friend=user, group = group).first()
+        if not contacts:
+            contacts = Contacts(user=user, friend=user, group = group)
+            contacts.save()
+
+        session = Session(name = session_name, host = user, friend_contacts = contacts, type = BUILT_SESSION)
         session.save()
         UserAndSession.objects.create(permission = SESSION_HOST, user = user, session = session)
 
 
         for id in initial_list:
             user = User.objects.get(user_id = id)
-            # UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
+            bond = UserAndSession.objects.filter(user = user, session = session)
+            if not bond:
+                UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
 
 
         return request_success()
@@ -190,12 +202,18 @@ def message(req: HttpRequest, id: int):
             info["sessionName"] = session.name
             info["isTop"] = session.isTop
             info["isMute"] = session.isMute
-            #info["sessionType"] = session.type
+            info["sessionType"] = session.type
             
-            message = Message.objects.filter(session=session).order_by("-time").first()
-            info["timestamp"] = message.time
-            info["type"] = message.type
-            info["message"] = message.text
+            message = Message.objects.filter(session=session)
+            if message:
+                message = message.order_by("-time").first()
+                info["timestamp"] = message.time
+                info["type"] = message.type
+                info["message"] = message.text
+            else:
+                info["timestamp"] = session.time
+                info["type"] = "message"
+                info["message"] = ""
 
             session_info.append(info)
 

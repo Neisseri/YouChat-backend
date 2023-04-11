@@ -11,8 +11,10 @@ class Session(models.Model):
     session_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
 
-    # type = models.IntegerField(default=2)
-    # friend_contacts = models.ForeignKey(Contacts, default=None, on_delete=models.CASCADE)
+    time = models.FloatField(default=utils_time.get_timestamp)
+
+    type = models.IntegerField(default=2)
+    friend_contacts = models.ForeignKey(Contacts, on_delete=models.CASCADE)
 
     host = models.ForeignKey(User, on_delete=models.CASCADE)
     isTop = models.BooleanField(default=False)

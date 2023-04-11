@@ -122,8 +122,8 @@ class SessionTests(TestCase):
         alice = User.objects.filter(name='swim17').first()
         res = self.post_chatroom(alice.user_id, 'abaababa', '100000')
 
-        self.assertEqual(res.json()['code'], 2)
         self.assertEqual(res.json()['info'], 'Session Not Existed')
+        self.assertEqual(res.json()['code'], 2)
 
     # quit from a chatroom
     def test_delete_chatroom(self):
