@@ -1,5 +1,6 @@
 import json
 import random
+from Session.models import Session, UserAndSession
 from django.http import HttpRequest
 from utils.utils_request import BAD_METHOD, request_failed, request_success, return_field
 from utils.utils_require import CheckRequire, require
@@ -7,6 +8,7 @@ from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
+from constants.session import SESSION_HOST, SESSION_MEMBER, SESSION_MANAGER, SESSION_REQUEST, FRIEDN_SESSION, BUILT_SESSION
 
 email2vcode = []
 
@@ -280,6 +282,13 @@ def friends_put(req: HttpRequest):
                 new_friend = Contacts(user=target, friend=user, group = UserGroup.objects.get(user=target, group_name = 'Default'))
                 new_friend_rev = Contacts(user=user, friend=target, group = UserGroup.objects.get(user=user, group_name = body['group']))
                 
+                session = Session(name = "friend", host = user, type = FRIEDN_SESSION)
+                session.save()
+                bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
+                bond.save()
+                bond = UserAndSession(permission = SESSION_MANAGER, user = target, session = session)
+                bond.save()
+
                 new_friend.save()
                 new_friend_rev.save()
                 

@@ -184,6 +184,7 @@ def message(req: HttpRequest, id: int):
             info["sessionName"] = session.name
             info["isTop"] = session.isTop
             info["isMute"] = session.isMute
+            info["type"] = session.type
             
             message = Message.objects.filter(session=session).order_by("-time").first()
             info["timestamp"] = message.time

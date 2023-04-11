@@ -10,9 +10,10 @@ coverage
 zmail
 
 # TODO Start: [Student] Add dependency on uWSGI
-uwsgi
+
 # TODO End: [Student] Add dependency on uWSGI
 
 channels
 channels_redis
 daphne
+websockets

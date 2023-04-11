@@ -10,6 +10,7 @@ from constants.session import MAX_MESSAGE_LENGTH
 class Session(models.Model):
     session_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
+    type = models.IntegerField(default=2)
     host = models.ForeignKey(User, on_delete=models.CASCADE)
     isTop = models.BooleanField(default=False)
     isMute = models.BooleanField(default=False)
