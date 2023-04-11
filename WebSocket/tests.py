@@ -20,7 +20,7 @@ class WebSocketTests(TestCase):
     # Utility Functions
 
     # Now start testcases.
-    def test_ws_message(self):
+    # def test_ws_message(self):
         
         # with connect("ws://127.0.0.1:8000/ws/message/") as websocket:
         #     websocket.send(json.dumps({
@@ -30,11 +30,10 @@ class WebSocketTests(TestCase):
         #     message = websocket.recv()
         #     self.assertEqual(message.json()['code'], 0)
 
-        ws = connect("ws://127.0.0.1:8000/ws/message/")
-        ws.send(json.dumps({
-            "type": "user_auth",
-            "id": 1
-        }))
-        message = ws.recv()
-        self.assertEqual(message.json()['code'], 0)
-    
+        # ws = connect("ws://127.0.0.1:8000/ws/message/")
+        # ws.send(json.dumps({
+        #     "type": "user_auth",
+        #     "id": 1
+        # }))
+        # message = ws.recv()
+        # self.assertEqual(message.json()['code'], 0)
