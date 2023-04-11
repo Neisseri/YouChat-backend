@@ -84,10 +84,10 @@ class MyConsumer(AsyncWebsocketConsumer):
         message = Message.objects.filter(message_id=message_id).first()
         message.delete()
 
+    @database_sync_to_async
     def check_invalid_message(self, text):
         if len(text) < constants.MAX_MESSAGE_LENGTH:
             return True
-        
         return False
 
     # user authority verification
@@ -139,7 +139,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        if await self.check_invalid_message(text):
+        if not await self.check_invalid_message(text):
             response_data = {"code": 3, "info": "Message Invalid"}
             await self.send(text_data=json.dumps(response_data))
             return
