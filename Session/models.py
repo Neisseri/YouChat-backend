@@ -1,6 +1,6 @@
 from django.db import models
 from utils import utils_time
-from User.models import User
+from User.models import User, Contacts
 
 from constants.session import MAX_CHAR_LENGTH
 from constants.session import MAX_MESSAGE_LENGTH
@@ -10,7 +10,10 @@ from constants.session import MAX_MESSAGE_LENGTH
 class Session(models.Model):
     session_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
+
     type = models.IntegerField(default=2)
+    friend_contacts = models.ForeignKey(Contacts, default=None, on_delete=models.CASCADE)
+
     host = models.ForeignKey(User, on_delete=models.CASCADE)
     isTop = models.BooleanField(default=False)
     isMute = models.BooleanField(default=False)
@@ -24,8 +27,8 @@ class Session(models.Model):
 class UserAndSession(models.Model):
     id = models.BigAutoField(primary_key=True)
     permission = models.IntegerField()
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    session = models.ForeignKey(Session, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
     
     class Meta:
         indexes = [models.Index(fields=["user"]), models.Index(fields=["session"])]

@@ -282,15 +282,15 @@ def friends_put(req: HttpRequest):
                 new_friend = Contacts(user=target, friend=user, group = UserGroup.objects.get(user=target, group_name = 'Default'))
                 new_friend_rev = Contacts(user=user, friend=target, group = UserGroup.objects.get(user=user, group_name = body['group']))
                 
-                session = Session(name = "friend", host = user, type = FRIEDN_SESSION)
+                new_friend.save()
+                new_friend_rev.save()
+                
+                session = Session(name = "friend", host = user, type = FRIEDN_SESSION, friend_contacts = new_friend_rev)
                 session.save()
                 bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
                 bond.save()
                 bond = UserAndSession(permission = SESSION_MANAGER, user = target, session = session)
                 bond.save()
-
-                new_friend.save()
-                new_friend_rev.save()
                 
                 request.delete()
             
