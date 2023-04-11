@@ -11,8 +11,8 @@ class Session(models.Model):
     session_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False)
 
-    type = models.IntegerField(default=2)
-    friend_contacts = models.ForeignKey(Contacts, default=None, on_delete=models.CASCADE)
+    # type = models.IntegerField(default=2)
+    # friend_contacts = models.ForeignKey(Contacts, default=None, on_delete=models.CASCADE)
 
     host = models.ForeignKey(User, on_delete=models.CASCADE)
     isTop = models.BooleanField(default=False)
@@ -26,9 +26,9 @@ class Session(models.Model):
     
 class UserAndSession(models.Model):
     id = models.BigAutoField(primary_key=True)
-    permission = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    permission = models.IntegerField()
     
     class Meta:
         indexes = [models.Index(fields=["user"]), models.Index(fields=["session"])]
