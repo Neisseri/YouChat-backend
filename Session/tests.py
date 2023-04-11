@@ -26,10 +26,11 @@ class SessionTests(TestCase):
     def get_message(self, user_id):
         return self.client.get(f'/session/message/{user_id}', content_type='application/json')
     
-    def put_chatroom(self, user_id, session_name):
+    def put_chatroom(self, user_id, session_name, initial):
         payload = {
             'userId': user_id,
-            'sessionName': session_name
+            'sessionName': session_name,
+            'initial': initial
         }
         return self.client.put('/session/chatroom', data=payload, content_type='application/json')
 
@@ -73,16 +74,16 @@ class SessionTests(TestCase):
 
         random.seed(5)
         alice = User.objects.filter(name='swim17').first()
-        res = self.put_chatroom(alice.user_id, 'chatroom')
+        res = self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
 
-        self.assertEqual(res.json()['code'], 0)
         self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
 
     # create chatroom for unexisted user
     def test_put_chatroom_user_unexisted(self):
 
         random.seed(6)
-        res = self.put_chatroom('abaaba', 'chatroom')
+        res = self.put_chatroom(10086, 'chatroom', [10086])
 
         self.assertEqual(res.json()['code'], 2)
         self.assertEqual(res.json()['info'], 'User Not Existed')
@@ -92,7 +93,7 @@ class SessionTests(TestCase):
 
         random.seed(7)
         alice = User.objects.filter(name='swim17').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         bob = User.objects.filter(name='swim11').first()
@@ -106,7 +107,7 @@ class SessionTests(TestCase):
 
         random.seed(8)
         alice = User.objects.filter(name='swim17').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         res = self.post_chatroom(10086, chatroom.name, chatroom.session_id)
@@ -130,7 +131,7 @@ class SessionTests(TestCase):
         random.seed(10)
         # Alice create chatroom
         alice = User.objects.filter(name='swim17').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         # Bob join chatroom
@@ -149,10 +150,10 @@ class SessionTests(TestCase):
         random.seed(11)
         # Alice create chatroom
         alice = User.objects.filter(name='swim17').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
-        res = self.delete_chatroom('abaaba', chatroom.session_id)
+        res = self.delete_chatroom(10086, chatroom.session_id)
 
         self.assertEqual(res.json()['code'], 1)
         self.assertEqual(res.json()['info'], 'User Not Existed')
@@ -173,7 +174,7 @@ class SessionTests(TestCase):
         random.seed(13)
         alice = User.objects.filter(name='swim17').first()
         bob = User.objects.filter(name='swim11').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         self.post_chatroom(bob.user_id, chatroom.name, chatroom.session_id)
@@ -189,7 +190,7 @@ class SessionTests(TestCase):
         random.seed(14)
         alice = User.objects.filter(name='swim17').first()
         bob = User.objects.filter(name='swim11').first()
-        self.put_chatroom(alice.name, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         self.post_chatroom(bob.user_id, chatroom.name, chatroom.session_id)
@@ -205,7 +206,7 @@ class SessionTests(TestCase):
         random.seed(15)
         alice = User.objects.filter(name='swim17').first()
         bob = User.objects.filter(name='swim11').first()
-        self.put_chatroom(alice.name, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         self.post_chatroom(bob.user_id, chatroom.name, chatroom.session_id)
@@ -221,12 +222,12 @@ class SessionTests(TestCase):
         random.seed(16)
         alice = User.objects.filter(name='swim17').first()
         bob = User.objects.filter(name='swim11').first()
-        self.put_chatroom(alice.name, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         self.post_chatroom(bob.user_id, chatroom.name, chatroom.session_id)
 
-        res = self.put_chatroom_admin(alice.user_id, chatroom.session_id, 'abaaba')
+        res = self.put_chatroom_admin(alice.user_id, chatroom.session_id, 10086)
 
         self.assertEqual(res.json()['code'], 3)
         self.assertEqual(res.json()['info'], 'Applicant Not Existed')
@@ -237,7 +238,7 @@ class SessionTests(TestCase):
         random.seed(17)
         alice = User.objects.filter(name='swim17').first()
         bob = User.objects.filter(name='swim11').first()
-        self.put_chatroom(alice.user_id, 'chatroom')
+        self.put_chatroom(alice.user_id, 'chatroom', [alice.user_id])
         chatroom = Session.objects.filter(name='chatroom').first()
 
         self.post_chatroom(bob.user_id, chatroom.name, chatroom.session_id)

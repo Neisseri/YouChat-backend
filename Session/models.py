@@ -26,9 +26,9 @@ class Session(models.Model):
     
 class UserAndSession(models.Model):
     id = models.BigAutoField(primary_key=True)
-    permission = models.IntegerField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    permission = models.IntegerField()
     
     class Meta:
         indexes = [models.Index(fields=["user"]), models.Index(fields=["session"])]

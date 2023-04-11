@@ -114,13 +114,13 @@ def join_chatroom(req: HttpRequest):
         session_name = body["sessionName"]
         session = Session(name = session_name, host = user)
         session.save()
-        bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
-        bond.save()
+        UserAndSession.objects.create(permission = SESSION_HOST, user = user, session = session)
+
 
         for id in initial_list:
             user = User.objects.get(user_id = id)
-            bond = UserAndSession(Permission = SESSION_MEMBER, user = user, session = session)
-            bond.save()
+            # UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
+
 
         return request_success()
 
