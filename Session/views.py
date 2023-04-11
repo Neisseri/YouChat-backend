@@ -41,11 +41,11 @@ def manage_chatroom(req: HttpRequest):
     body = json.loads(req.body.decode("utf-8"))
     
     if req.method == "PUT":
-        user_name = body['userName']
+        user_id = body['userId']
         session_id = body['sessionId']
 
         session = Session.objects.filter(session_id = session_id).first()
-        user = User.objects.filter(name = user_name).first()
+        user = User.objects.filter(user_id = user_id).first()
 
         if not session:
             return request_failed(2, "Session Not Existed", 400)
@@ -85,12 +85,12 @@ def join_chatroom(req: HttpRequest):
     body = json.loads(req.body.decode("utf-8"))
 
     if req.method == "POST":
-        user_name = body["userName"]
+        user_id = body["userId"]
         session_name = body["sessionName"]
         session_id = body["sessionId"]
 
         session = Session.objects.filter(name = session_name, session_id = session_id).first()
-        user = User.objects.filter(name = user_name).first()
+        user = User.objects.filter(user_id = user_id).first()
 
         if not user:
             return request_failed(1, "User Not Existed", 400)
@@ -104,8 +104,9 @@ def join_chatroom(req: HttpRequest):
         return request_success()
     
     elif req.method == "PUT":
-        user_name = body["userName"]
-        user = User.objects.filter(name = user_name).first()
+        user_id = body["userId"]
+        user = User.objects.filter(user_id = user_id).first()
+        initial_list = body["initial"]
 
         if not user:
             return request_failed(2, "User Not Existed", 400)
@@ -116,13 +117,18 @@ def join_chatroom(req: HttpRequest):
         bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
         bond.save()
 
+        for id in initial_list:
+            user = User.objects.get(user_id = id)
+            bond = UserAndSession(Permission = SESSION_MEMBER, user = user, session = session)
+            bond.save()
+
         return request_success()
 
     elif req.method == "DELETE":
         session_id = body["sessionId"]
-        user_name = body["userName"]
+        user_id = body["userId"]
         session = Session.objects.filter(session_id = session_id).first()
-        user = User.objects.filter(name = user_name).first()
+        user = User.objects.filter(user_id = user_id).first()
 
         if not user:
             return request_failed(1, "User Not Existed", 400)
