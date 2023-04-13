@@ -102,15 +102,12 @@ ASGI_APPLICATION = 'st_im_django.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
+        'NAME': 'django',
+        'USER': 'django',
         'PASSWORD': '66666666',
         'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
         'PORT': '5432',
     },
-    'TEST': {
-        'NAME': 'test',
-    }
 }
 
 # DATABASES = {
