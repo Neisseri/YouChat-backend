@@ -224,6 +224,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
+        await self.send(text_data=json.dumps({"code": 999, "info": "test"}))
         text_data_json = json.loads(text_data)
         type = text_data_json["type"]
 
