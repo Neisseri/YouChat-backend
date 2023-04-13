@@ -66,6 +66,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             message_data = {
                 "senderId": message.sender.user_id,
                 "timestamp": message.time,
+                "messageId": message.message_id,
                 "message": message.text
             }
             message_list.append(message_data)
