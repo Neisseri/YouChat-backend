@@ -18,6 +18,7 @@ build:
     - master
     - dev
     - dev_session_system
+    - dev_database
   # TODO End: [Student] Set as only master
 
 unit-test:
@@ -51,4 +52,5 @@ deploy:
     - master
     - dev
     - dev_session_system
+    - dev_database
   # TODO End: [Student] Set as only master
