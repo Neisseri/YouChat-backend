@@ -93,6 +93,8 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # user authority verification
     async def user_auth(self, id):
+        if self.user_id:
+            return
 
         self.user = await self.get_user_by_id(id)
         if not self.user:
@@ -233,15 +235,21 @@ class MyConsumer(AsyncWebsocketConsumer):
             id = text_data_json['id']
             await self.user_auth(id)
         elif type == 'pull':
+            id = text_data_json['id']
+            await self.user_auth(id)
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
             await self.message_pull(session_id, message_scale)
         elif type == 'send':
+            id = text_data_json['id']
+            await self.user_auth(id)
             session_id = text_data_json['sessionId']
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             await self.send_message(session_id, timestamp, text)
         elif type == 'delete':
+            id = text_data_json['id']
+            await self.user_auth(id)
             message_id = text_data_json['messageId']
             await self.group_delete_message(message_id)
             await self.delete_message(message_id)
