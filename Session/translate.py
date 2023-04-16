@@ -9,3 +9,7 @@ def translate(language, text):
     r = requests.get("http://fanyi.youdao.com/translate",params=data2)
     result = r.json()
     print(result)
+
+if __name__ == '__main__':
+    text = 'Did you eat?'
+    print(translate('English', text))
