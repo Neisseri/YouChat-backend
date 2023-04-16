@@ -18,5 +18,6 @@ python3 manage.py migrate
 #     --ugreen
 redis-server /opt/tmp/redis.conf
 sleep 5
-daphne -b 0.0.0.0 -p 80 st_im_django.routing:application
+# daphne -b 0.0.0.0 -p 80 st_im_django.routing:application
+uvicorn st_im_django.routing:application --host 0.0.0.0 --port 80
 #TODO End: [Student] Run with uWSGI instead
