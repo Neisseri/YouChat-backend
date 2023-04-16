@@ -91,6 +91,7 @@ def user(req: HttpRequest):
         token = random.randint(0, 1000)
         tokenPair = TokenPair(user=user, token=token)
         tokenPair.save()
+        req.session['is_login'] = user.user_id
 
         return request_success({"token":token, "id": user.user_id})
         
@@ -137,17 +138,11 @@ def user(req: HttpRequest):
 def friends(req: HttpRequest, query: any):
     
     if req.method == "GET":
-        token = req.COOKIES.get("token")
-
-        if not token:
-            return request_failed(2, "Bad Token", status_code=400)
-        
-        token_pair = TokenPair.objects.filter(token=token).first()
-
-        if not token_pair:
+        userId = req.session.get('is_login')
+        if not userId:
             return request_failed(2, "Please login", status_code=400)
         
-        user = token_pair.user
+        user = User.objects.filter(user_id=userId).first()
 
         query_list = User.objects.filter(Q(name__contains=query) | Q(nickname__contains=query) | Q(email__contains=query)) if query != '*' else User.objects.all()
 
@@ -219,10 +214,15 @@ def friends(req: HttpRequest, query: any):
                                 }
                             )
                     else:
-                        if query_item == user:
-                            continue
+                        if query_item == user:  #myself
+                            return_data["friendList"].append(
+                                {
+                                    "group": "Myself", 
+                                    "list": [return_field(query_item.serialize(), ["id", "nickname"])]
+                                }
+                            )
                         
-                        if query == '*':
+                        if query == '*':    # return all friends
                             continue
 
                         group_index = where_is_group("Stranger")
@@ -250,17 +250,12 @@ def friends_put(req: HttpRequest):
     if req.method == "PUT":
         body = json.loads(req.body.decode("utf-8"))
 
-        token = req.COOKIES.get('token')
-        
-        if not token:
-            return request_failed(2, "Bad Token", status_code=400)
-        
-        token_pair = TokenPair.objects.filter(token=token).first()
-
-        if not token_pair:
+        userId = req.session.get('is_login')
+        if not userId:
             return request_failed(2, "Please login", status_code=400)
         
-        user = token_pair.user
+        user = User.objects.filter(user_id=userId).first()
+
         target = User.objects.filter(user_id=body['id']).first()
 
         if (body['group'] != 'RequestTo' and body['group'] != 'Stranger'):
@@ -409,17 +404,11 @@ def modify(req: HttpRequest):
         code = body["code"]
         new = body["new"]
 
-        token = req.COOKIES.get('token')
-        
-        if not token:
-            return request_failed(2, "Bad Token", status_code=400)
-        
-        token_pair = TokenPair.objects.filter(token=token).first()
-
-        if not token_pair:
+        userId = req.session.get('is_login')
+        if not userId:
             return request_failed(2, "Please login", status_code=400)
         
-        user = token_pair.user
+        user = User.objects.filter(user_id=userId).first()
 
         if code == 1:
             if User.objects.filter(name = new).first():
@@ -501,6 +490,7 @@ def email_verify(req: HttpRequest):
                     "token": token,
                     "id": user.user_id
                 }
+                req.session['is_login'] = user.user_id
                 return request_success(response)
 
         return request_failed(code=2, info="Login Failure")

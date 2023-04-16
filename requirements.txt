@@ -18,3 +18,4 @@ channels_redis
 daphne
 websockets
 psycopg2-binary
+uvicorn
