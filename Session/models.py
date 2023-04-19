@@ -43,6 +43,8 @@ class Message(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.IntegerField(default=0)
+    message_type = models.CharField(max_length=MAX_CHAR_LENGTH,default="text")
+
 
 
     class Meta:
