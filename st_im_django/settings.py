@@ -174,9 +174,9 @@ EMAIL_HOST_PASSWORD = '8fcf93c3471c7b2c'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
         "CONFIG": {
-            "hosts": [("0.0.0.0", 6379)],
+            "hosts": [("localhost", 6379)],
         },
     },
 }
