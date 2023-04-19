@@ -147,6 +147,10 @@ class MyConsumer(AsyncWebsocketConsumer):
             response_data = {"code": 3, "info": "Message Invalid"}
             await self.send(text_data=json.dumps(response_data))
             return
+        
+        await self.channel_layer.group_send(
+            "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
+        )
 
         message_id = await self.add_message(text, timestamp, session_id, self.user_id, message_type)
         
