@@ -132,17 +132,20 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # send message
     async def send_message(self, session_id, timestamp, text, message_type = "text"):
+        await self.send(text_data=json.dumps({"code": 666, "info": "test"}))
 
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
+        await self.send(text_data=json.dumps({"code": 555, "info": "test"}))
         
         if not await self.get_session(session_id):
             response_data = {"code": 2, "info": "Session Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
-        
+        await self.send(text_data=json.dumps({"code": 444, "info": "test"}))
+
         if not await self.check_invalid_message(text):
             response_data = {"code": 3, "info": "Message Invalid"}
             await self.send(text_data=json.dumps(response_data))
@@ -246,6 +249,7 @@ class MyConsumer(AsyncWebsocketConsumer):
                 await self.user_auth(id)
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
+            await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
             await self.message_pull(session_id, message_scale)
         elif type == 'send':
             id = dict(text_data_json).get('id')
