@@ -95,6 +95,8 @@ class MyConsumer(AsyncWebsocketConsumer):
     # user authority verification
     async def user_auth(self, id):
         if self.user_id:
+            response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
+            await self.send(text_data=json.dumps(response_data))
             return
 
         self.user = await self.get_user_by_id(id)
