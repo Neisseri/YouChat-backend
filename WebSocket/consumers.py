@@ -140,11 +140,11 @@ class MyConsumer(AsyncWebsocketConsumer):
             return
         await self.send(text_data=json.dumps({"code": 555, "info": "test"}))
         
-        if not await self.get_session(session_id):
-            response_data = {"code": 2, "info": "Session Not Existed"}
-            await self.send(text_data=json.dumps(response_data))
-            return
-        await self.send(text_data=json.dumps({"code": 444, "info": "test"}))
+        # # if not await self.get_session(session_id):
+        # #     response_data = {"code": 2, "info": "Session Not Existed"}
+        # #     await self.send(text_data=json.dumps(response_data))
+        # #     return
+        # await self.send(text_data=json.dumps({"code": 444, "info": "test"}))
 
         if not await self.check_invalid_message(text):
             response_data = {"code": 3, "info": "Message Invalid"}
