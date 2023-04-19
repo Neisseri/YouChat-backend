@@ -151,6 +151,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
+        await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
+        
         await self.channel_layer.group_send(
             "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
         )
@@ -249,7 +251,6 @@ class MyConsumer(AsyncWebsocketConsumer):
                 await self.user_auth(id)
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
-            await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
             await self.message_pull(session_id, message_scale)
         elif type == 'send':
             id = dict(text_data_json).get('id')
@@ -259,6 +260,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             message_type = text_data_json['messageType']
+            await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
             await self.send_message(session_id, timestamp, text, message_type)
         elif type == 'delete':
             id = dict(text_data_json).get('id')
