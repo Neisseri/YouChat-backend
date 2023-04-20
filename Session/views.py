@@ -8,6 +8,7 @@ from User.models import User, UserGroup, Contacts
 from utils.utils_request import request_failed, request_success, return_field, BAD_METHOD
 import json
 import base64
+import translate
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -233,5 +234,21 @@ def message(req: HttpRequest, id: int):
 
 @CheckRequire
 def message_translate(req: HttpRequest):
+
+    body = json.loads(req.body.decode('utf-8'))
+    language = body['language']
+    text = body['text']
+    translated_text = ''
+
+    if language == 'English':
+        
+        translated_text = translate(language, text)
+        response = {
+            'code': 0,
+            'info': 'Succeed',
+            'text': translated_text
+        }
+
+        return request_success(response)
 
     return request_success()
