@@ -8,7 +8,7 @@ from User.models import User, UserGroup, Contacts
 from utils.utils_request import request_failed, request_success, return_field, BAD_METHOD
 import json
 import base64
-import translate
+import requests
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -232,6 +232,16 @@ def message(req: HttpRequest, id: int):
     else:
         return BAD_METHOD
 
+# reference: https://blog.csdn.net/qq_25691777/article/details/120823770#1_3
+def translate2chinese(language, text):
+    # data1 = { 'doctype': 'json', 'type': 'auto','i': '你吃饭了吗？' }
+    data = { 'doctype': 'json', 'type': 'auto','i': text }
+    r = requests.get("http://fanyi.youdao.com/translate", params=data)
+    response = r.json()
+    result = response['translateResult'][0][0]
+    tgt = result['tgt']
+    return tgt
+
 @CheckRequire
 def message_translate(req: HttpRequest):
 
@@ -242,7 +252,7 @@ def message_translate(req: HttpRequest):
 
     if language == 'English':
         
-        translated_text = translate(language, text)
+        translated_text = translate2chinese(language, text)
         response = {
             'code': 0,
             'info': 'Succeed',
