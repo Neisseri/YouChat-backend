@@ -12,6 +12,7 @@ import constants.session as constants
 import datetime
 
 class MyConsumer(AsyncWebsocketConsumer):
+    all_groups = {}
     
     @database_sync_to_async
     def get_user_by_id(self, id):
@@ -109,6 +110,10 @@ class MyConsumer(AsyncWebsocketConsumer):
 
         for room_name in self.room_name_list:
             room_group_name = "chat_%s" % room_name
+            if MyConsumer.all_groups.get(room_group_name) is not None:
+                MyConsumer.all_groups[room_group_name].append(self)
+            else:
+                MyConsumer.all_groups[room_group_name] = [self]
             await self.channel_layer.group_add(room_group_name, self.channel_name)
         
         response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
@@ -153,11 +158,11 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
+        # await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
         
-        await self.channel_layer.group_send(
-            "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
-        )
+        # await self.channel_layer.group_send(
+        #     "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
+        # )
 
         message_id = await self.add_message(text, timestamp, session_id, self.user_id, message_type)
         
@@ -173,10 +178,14 @@ class MyConsumer(AsyncWebsocketConsumer):
             "messageType": message_type
         }
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            "chat_%s" % session_id, {"type": "chat_message", "message": response}
-        )
+        for consumers in MyConsumer.all_groups["chat_%s" % session_id]:
+            consumers: MyConsumer
+            await consumers.message_from_others(response)
+
+        # # Send message to room group
+        # await self.channel_layer.group_send(
+        #     "chat_%s" % session_id, {"type": "chat_message", "message": response}
+        # )
 
     async def group_delete_message(self, message_id):
 
@@ -234,9 +243,11 @@ class MyConsumer(AsyncWebsocketConsumer):
     # end websocket connection
     async def disconnect(self, close_code):
         # Leave room group
-        for room_name in self.room_name_list:
-            room_group_name = "chat_%s" % room_name
-            await self.channel_layer.group_discard(room_group_name, self.channel_name)
+        if self.room_name_list:
+            for room_name in self.room_name_list:
+                room_group_name = "chat_%s" % room_name
+                # await self.channel_layer.group_discard(room_group_name, self.channel_name)
+                MyConsumer.all_groups[room_group_name].remove(self)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -279,4 +290,8 @@ class MyConsumer(AsyncWebsocketConsumer):
         message = dict(event["message"])
 
         # Send message to WebSocket
+        await self.send(text_data=json.dumps(message))
+
+    async def message_from_others(self, message):
+
         await self.send(text_data=json.dumps(message))

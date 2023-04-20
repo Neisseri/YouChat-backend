@@ -1,6 +1,6 @@
 FROM python:3.9
 
-# ENV DEPLOY = 1
+ENV DEPLOY = 1
 
 WORKDIR /opt/tmp
 
