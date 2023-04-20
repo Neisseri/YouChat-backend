@@ -158,7 +158,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        # await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
+        await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
         
         # await self.channel_layer.group_send(
         #     "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
@@ -177,6 +177,8 @@ class MyConsumer(AsyncWebsocketConsumer):
 	        "message": text,
             "messageType": message_type
         }
+
+        await self.send(text_data=json.dumps({"code": 888, "info": "test"}))
 
         for consumers in MyConsumer.all_groups["chat_%s" % session_id]:
             consumers: MyConsumer
