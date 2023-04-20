@@ -9,6 +9,7 @@ from utils.utils_request import request_failed, request_success, return_field, B
 import json
 import base64
 import requests
+import urllib.parse, urllib.request
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -232,15 +233,37 @@ def message(req: HttpRequest, id: int):
     else:
         return BAD_METHOD
 
-# reference: https://blog.csdn.net/qq_25691777/article/details/120823770#1_3
 def translate2chinese(language, text):
-    # data1 = { 'doctype': 'json', 'type': 'auto','i': '你吃饭了吗？' }
+
+    # reference: https://blog.csdn.net/qq_25691777/article/details/120823770#1_3
+    '''
     data = { 'doctype': 'json', 'type': 'auto','i': text }
     r = requests.get("http://fanyi.youdao.com/translate", params=data)
     response = r.json()
     result = response['translateResult'][0][0]
     tgt = result['tgt']
     return tgt
+    '''
+
+    # reference: https://blog.csdn.net/whatday/article/details/106057309
+    url_youdao = 'http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=' \
+      'http://www.youdao.com/'
+    dict = {}
+    dict['type'] = 'AUTO'
+    dict['doctype'] = 'json'
+    dict['xmlVersion'] = '1.8'
+    dict['keyfrom'] = 'fanyi.web'
+    dict['ue'] = 'UTF-8'
+    dict['action'] = 'FY_BY_CLICKBUTTON'
+    dict['typoResult'] = 'true'
+    dict['i'] = text
+    data = urllib.parse.urlencode(dict).encode('utf-8')
+    response = urllib.request.urlopen(url_youdao, data)
+    content = response.read().decode('utf-8')
+    data = json.loads(content)
+    result = data['translateResult'][0][0]['tgt']
+    print(result)
+
 
 @CheckRequire
 def message_translate(req: HttpRequest):
@@ -262,3 +285,9 @@ def message_translate(req: HttpRequest):
         return request_success(response)
 
     return request_success()
+
+# tyt: test my function for translate
+if __name__ == '__main__':
+    
+    text = 'Hello, How are you. I am hungry'
+    print(translate2chinese('English', text))
