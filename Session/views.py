@@ -230,3 +230,8 @@ def message(req: HttpRequest, id: int):
 
     else:
         return BAD_METHOD
+
+@CheckRequire
+def message_translate(req: HttpRequest):
+
+    return request_success()
