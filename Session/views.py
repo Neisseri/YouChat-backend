@@ -84,8 +84,6 @@ def manage_chatroom(req: HttpRequest):
 @CheckRequire
 def join_chatroom(req: HttpRequest):
 
-    body = json.loads(req.body.decode("utf-8"))
-
     if req.method == "GET":
         session_id = req.GET.get("id")
         session = Session.objects.get(session_id = session_id)
@@ -106,6 +104,8 @@ def join_chatroom(req: HttpRequest):
         return request_success({"sessionName": session_name, "members": members})
 
     elif req.method == "POST":
+        body = json.loads(req.body.decode("utf-8"))
+
         user_id = body["userId"]
         session_name = body["sessionName"]
         session_id = body["sessionId"]
@@ -125,6 +125,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
     
     elif req.method == "PUT":
+        body = json.loads(req.body.decode("utf-8"))
+
         user_id = body["userId"]
         user = User.objects.filter(user_id = user_id).first()
         initial_list = body["initial"]
@@ -158,6 +160,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
 
     elif req.method == "DELETE":
+        body = json.loads(req.body.decode("utf-8"))
+        
         session_id = body["sessionId"]
         user_id = body["userId"]
         session = Session.objects.filter(session_id = session_id).first()
