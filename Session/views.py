@@ -86,7 +86,26 @@ def join_chatroom(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
 
-    if req.method == "POST":
+    if req.method == "GET":
+        session_id = req.GET.get("id")
+        session = Session.objects.get(session_id = session_id)
+        bonds = UserAndSession.objects.filter(session = session)
+
+        members = []
+        for bond in bonds:
+            user = bond.user
+            info = {}
+            info["id"] = user.user_id
+            info["nickname"] = user.nickname
+            info["role"] = bond.permission
+
+            members.append(info)
+
+        session_name = session.name
+
+        return request_success({"sessionName": session_name, "members": members})
+
+    elif req.method == "POST":
         user_id = body["userId"]
         session_name = body["sessionName"]
         session_id = body["sessionId"]
