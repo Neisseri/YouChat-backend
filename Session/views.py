@@ -87,7 +87,6 @@ def join_chatroom(req: HttpRequest):
     body = json.loads(req.body.decode("utf-8"))
 
     if req.method == "GET":
-        req.GET.get("id")
         session_id = req.GET.get("id")
         session = Session.objects.get(session_id = session_id)
         bonds = UserAndSession.objects.filter(session = session)
