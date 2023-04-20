@@ -221,6 +221,7 @@ def friends(req: HttpRequest, query: any):
                                     "list": [return_field(query_item.serialize(), ["id", "nickname"])]
                                 }
                             )
+                            continue
                         
                         if query == '*':    # return all friends
                             continue
@@ -499,17 +500,11 @@ def email_verify(req: HttpRequest):
 def profile(req: HttpRequest, id: any):
 
     if req.method == "GET":
-        token = req.COOKIES.get('token')
-                
-        if not token:
-            return request_failed(2, "Bad Token", status_code=400)
-        
-        token_pair = TokenPair.objects.filter(token=token).first()
-
-        if not token_pair:
+        userId = req.session.get('is_login')
+        if not userId:
             return request_failed(2, "Please login", status_code=400)
         
-        user = token_pair.user
+        user = User.objects.filter(user_id=userId).first()
 
         target = User.objects.filter(user_id=id).first()
         if not target:
