@@ -285,9 +285,3 @@ def message_translate(req: HttpRequest):
         return request_success(response)
 
     return request_success()
-
-# tyt: test my function for translate
-if __name__ == '__main__':
-    
-    text = 'Hello, How are you. I am hungry'
-    print(translate2chinese('English', text))
