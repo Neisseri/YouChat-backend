@@ -99,29 +99,29 @@ ASGI_APPLICATION = 'st_im_django.routing.application'
 #     }
 # }
 if os.getenv('DEPLOY') == None:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres',
-            'USER': 'postgres',
-            'PASSWORD': '66666666',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-        },
-        'TEST': {
-            'NAME': 'test',
-        }
-    }
     # DATABASES = {
     #     'default': {
     #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': 'backend',
-    #         'USER': 'backend',
+    #         'NAME': 'postgres',
+    #         'USER': 'postgres',
     #         'PASSWORD': '66666666',
-    #         'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+    #         'HOST': '127.0.0.1',
     #         'PORT': '5432',
     #     },
+    #     'TEST': {
+    #         'NAME': 'test',
+    #     }
     # }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'backend',
+            'USER': 'backend',
+            'PASSWORD': '66666666',
+            'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+            'PORT': '5432',
+        },
+    }
 else:
     DATABASES = {
         'default': {
