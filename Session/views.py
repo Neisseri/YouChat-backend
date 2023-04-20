@@ -84,9 +84,28 @@ def manage_chatroom(req: HttpRequest):
 @CheckRequire
 def join_chatroom(req: HttpRequest):
 
-    body = json.loads(req.body.decode("utf-8"))
+    if req.method == "GET":
+        session_id = req.GET.get("id")
+        session = Session.objects.get(session_id = session_id)
+        bonds = UserAndSession.objects.filter(session = session)
 
-    if req.method == "POST":
+        members = []
+        for bond in bonds:
+            user = bond.user
+            info = {}
+            info["id"] = user.user_id
+            info["nickname"] = user.nickname
+            info["role"] = bond.permission
+
+            members.append(info)
+
+        session_name = session.name
+
+        return request_success({"sessionName": session_name, "members": members})
+
+    elif req.method == "POST":
+        body = json.loads(req.body.decode("utf-8"))
+
         user_id = body["userId"]
         session_name = body["sessionName"]
         session_id = body["sessionId"]
@@ -106,6 +125,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
     
     elif req.method == "PUT":
+        body = json.loads(req.body.decode("utf-8"))
+
         user_id = body["userId"]
         user = User.objects.filter(user_id = user_id).first()
         initial_list = body["initial"]
@@ -139,6 +160,8 @@ def join_chatroom(req: HttpRequest):
         return request_success()
 
     elif req.method == "DELETE":
+        body = json.loads(req.body.decode("utf-8"))
+        
         session_id = body["sessionId"]
         user_id = body["userId"]
         session = Session.objects.filter(session_id = session_id).first()
@@ -285,9 +308,3 @@ def message_translate(req: HttpRequest):
         return request_success(response)
 
     return request_success()
-
-# tyt: test my function for translate
-if __name__ == '__main__':
-    
-    text = 'Hello, How are you. I am hungry'
-    print(translate2chinese('English', text))
