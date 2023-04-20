@@ -110,10 +110,10 @@ class MyConsumer(AsyncWebsocketConsumer):
 
         for room_name in self.room_name_list:
             room_group_name = "chat_%s" % room_name
-            if MyConsumer.all_groups.get(room_group_name) is not None:
-                MyConsumer.all_groups[room_group_name].append(self)
-            else:
-                MyConsumer.all_groups[room_group_name] = [self]
+            # if MyConsumer.all_groups.get(room_group_name) is not None:
+            #     MyConsumer.all_groups[room_group_name].append(self)
+            # else:
+            #     MyConsumer.all_groups[room_group_name] = [self]
             await self.channel_layer.group_add(room_group_name, self.channel_name)
         
         response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
@@ -139,30 +139,21 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # send message
     async def send_message(self, session_id, timestamp, text, message_type = "text"):
-        await self.send(text_data=json.dumps({"code": 666, "info": "test"}))
 
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
-        await self.send(text_data=json.dumps({"code": 555, "info": "test"}))
         
-        # # if not await self.get_session(session_id):
-        # #     response_data = {"code": 2, "info": "Session Not Existed"}
-        # #     await self.send(text_data=json.dumps(response_data))
-        # #     return
-        # await self.send(text_data=json.dumps({"code": 444, "info": "test"}))
+        # if not await self.get_session(session_id):
+        #     response_data = {"code": 2, "info": "Session Not Existed"}
+        #     await self.send(text_data=json.dumps(response_data))
+        #     return
 
         if not await self.check_invalid_message(text):
             response_data = {"code": 3, "info": "Message Invalid"}
             await self.send(text_data=json.dumps(response_data))
             return
-        
-        await self.send(text_data=json.dumps({"code": 333, "info": "test"}))
-        
-        # await self.channel_layer.group_send(
-        #     "chat_%s" % session_id, {"type": "chat_message", "message": {"code": 888, "info": "test"}}
-        # )
 
         message_id = await self.add_message(text, timestamp, session_id, self.user_id, message_type)
         
@@ -178,16 +169,15 @@ class MyConsumer(AsyncWebsocketConsumer):
             "messageType": message_type
         }
 
-        await self.send(text_data=json.dumps({"code": 888, "info": "test"}))
 
-        for consumers in MyConsumer.all_groups["chat_%s" % session_id]:
-            consumers: MyConsumer
-            await consumers.message_from_others(response)
+        # for consumers in MyConsumer.all_groups["chat_%s" % session_id]:
+        #     consumers: MyConsumer
+        #     await consumers.message_from_others(response)
 
-        # # Send message to room group
-        # await self.channel_layer.group_send(
-        #     "chat_%s" % session_id, {"type": "chat_message", "message": response}
-        # )
+        # Send message to room group
+        await self.channel_layer.group_send(
+            "chat_%s" % session_id, {"type": "chat_message", "message": response}
+        )
 
     async def group_delete_message(self, message_id):
 
@@ -248,12 +238,11 @@ class MyConsumer(AsyncWebsocketConsumer):
         if self.room_name_list:
             for room_name in self.room_name_list:
                 room_group_name = "chat_%s" % room_name
-                # await self.channel_layer.group_discard(room_group_name, self.channel_name)
-                MyConsumer.all_groups[room_group_name].remove(self)
+                await self.channel_layer.group_discard(room_group_name, self.channel_name)
+                # MyConsumer.all_groups[room_group_name].remove(self)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
-        await self.send(text_data=json.dumps({"code": 999, "info": "test"}))
         text_data_json = json.loads(text_data)
         type = text_data_json["type"]
 
@@ -275,7 +264,6 @@ class MyConsumer(AsyncWebsocketConsumer):
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             message_type = text_data_json['messageType']
-            await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
             await self.send_message(session_id, timestamp, text, message_type)
         elif type == 'delete':
             id = dict(text_data_json).get('id')

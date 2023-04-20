@@ -185,8 +185,11 @@ EMAIL_HOST_PASSWORD = '8fcf93c3471c7b2c'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://st-im-next-swimtogether.app.secoder.net', 'http://localhost:3000', 'https://st-im-next-swimtogether.app.secoder.net', 'https://localhost:3000']
