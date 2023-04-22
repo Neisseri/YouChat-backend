@@ -291,20 +291,21 @@ def translate2chinese(language, text):
 @CheckRequire
 def message_translate(req: HttpRequest):
 
-    body = json.loads(req.body.decode('utf-8'))
-    language = body['language']
-    text = body['text']
-    translated_text = ''
+    if req.method == 'PUT':
+        body = json.loads(req.body.decode('utf-8'))
+        language = body['language']
+        text = body['text']
+        translated_text = ''
 
-    if language == 'English':
-        
-        translated_text = translate2chinese(language, text)
-        response = {
-            'code': 0,
-            'info': 'Succeed',
-            'text': translated_text
-        }
+        if language == 'English':
+            
+            translated_text = translate2chinese(language, text)
+            response = {
+                'code': 0,
+                'info': 'Succeed',
+                'text': translated_text
+            }
 
-        return request_success(response)
+            return request_success(response)
 
     return request_success()

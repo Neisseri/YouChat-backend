@@ -1,7 +1,7 @@
 import json
 import random
 from Session.models import Session, UserAndSession
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from utils.utils_request import BAD_METHOD, request_failed, request_success, return_field
 from utils.utils_require import CheckRequire, require
 from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 import random
 from constants.session import SESSION_HOST, SESSION_MEMBER, SESSION_MANAGER, SESSION_REQUEST, FRIEDN_SESSION, BUILT_SESSION
+import base64
 
 email2vcode = []
 
@@ -541,5 +542,30 @@ def profile(req: HttpRequest, id: any):
 
 
 @CheckRequire
-def user_image(req: HttpRequest):
-    return request_success()
+def transmit_img(req: HttpRequest, user_id):
+
+    # receive an image from front-end
+    if req.method == 'PUT':
+        user = User.objects.filter(user_id=user_id).first()
+        if not user:
+            response = {
+                'code': 2,
+                'info': 'Upload failed',
+            }
+            return HttpResponse(response)
+        body = json.loads(req.body.decode("utf-8"))
+        img = body['img']
+        user.portrait = base64.b64decode(img)
+        response = {
+            'code': 0,
+	        'info': 'Upload Success',
+        }
+        return HttpResponse(response)
+    
+    elif req.method == 'GET':
+        user = User.objects.filter(user_id=user_id).first()
+        img = user.portrait
+        response = {
+            'img': img
+        }
+        return HttpResponse(response)
