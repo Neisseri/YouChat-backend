@@ -19,7 +19,7 @@ class User(models.Model):
     friend_requests = models.ManyToManyField('self', related_name='friend_requests_backward', through='FriendRequests', symmetrical=False)
     
     # TODO: add head portrait field
-    portrait = models.TextField()
+    portrait = models.TextField(default='')
 
     def serialize(self):
         return {
