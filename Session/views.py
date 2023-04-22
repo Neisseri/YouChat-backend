@@ -248,6 +248,19 @@ def message(req: HttpRequest, id: int):
                 info["type"] = "message"
                 info["message"] = ""
 
+            user_binds = UserAndSession.objects.filter(session = session)
+            time_list = {}
+
+            for user_bind in user_binds:
+                user = user_bind.user
+                user_name = user.name
+
+                timestamp = user_bind.read_time
+
+                time_list[user_name] = timestamp
+
+            info["readTimeList"] = time_list
+
             session_info.append(info)
 
         def get_time(info):
@@ -256,6 +269,28 @@ def message(req: HttpRequest, id: int):
         session_info.sort(key=get_time)
 
         return request_success({"data": session_info})
+    
+    elif req.method == "POST":
+        user = User.objects.filter(user_id = id).first()
+
+        if not user:
+            return request_failed(2, "User Not Existed", 400)
+
+        body = json.loads(req.body.decode("utf-8"))
+
+        session_id = body["sessionId"]
+        session = Session.objects.get(session_id = session_id)
+
+        if not session:
+            return request_failed(3, "Session Not Existed", 400)
+
+        timestamp = body["readTime"]
+
+        bond = UserAndSession.objects.filter(user = user, session = session)
+
+        bond.read_time = timestamp
+
+        bond.save()
 
     else:
         return BAD_METHOD

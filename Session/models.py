@@ -32,6 +32,8 @@ class UserAndSession(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     permission = models.IntegerField()
     
+    read_time = models.FloatField(default=utils_time.get_timestamp)
+    
     class Meta:
         indexes = [models.Index(fields=["user"]), models.Index(fields=["session"])]
         unique_together = ("user", "session")
