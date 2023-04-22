@@ -285,8 +285,8 @@ def translate2chinese(language, text):
     content = response.read().decode('utf-8')
     data = json.loads(content)
     result = data['translateResult'][0][0]['tgt']
-    print(result)
-
+    
+    return result
 
 @CheckRequire
 def message_translate(req: HttpRequest):
@@ -295,17 +295,16 @@ def message_translate(req: HttpRequest):
         body = json.loads(req.body.decode('utf-8'))
         language = body['language']
         text = body['text']
-        translated_text = ''
-
-        if language == 'English':
             
-            translated_text = translate2chinese(language, text)
-            response = {
-                'code': 0,
-                'info': 'Succeed',
-                'text': translated_text
-            }
+        translated_text = translate2chinese(language, text)
+        
+        response = {
+            'code': 0,
+            'info': 'Succeed',
+            'text': translated_text
+        }
 
-            return request_success(response)
+        return request_success(response)
 
-    return request_success()
+    else:
+        return BAD_METHOD
