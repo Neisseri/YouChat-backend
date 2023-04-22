@@ -10,6 +10,10 @@ import json
 import base64
 import requests
 import urllib.parse, urllib.request
+import http.client
+import hashlib
+from urllib import parse
+import random
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -258,35 +262,38 @@ def message(req: HttpRequest, id: int):
 
 def translate2chinese(language, text):
 
-    # reference: https://blog.csdn.net/qq_25691777/article/details/120823770#1_3
-    '''
-    data = { 'doctype': 'json', 'type': 'auto','i': text }
-    r = requests.get("http://fanyi.youdao.com/translate", params=data)
-    response = r.json()
-    result = response['translateResult'][0][0]
-    tgt = result['tgt']
-    return tgt
-    '''
-
-    # reference: https://blog.csdn.net/whatday/article/details/106057309
-    url_youdao = 'http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=' \
-      'http://www.youdao.com/'
-    dict = {}
-    dict['type'] = 'AUTO'
-    dict['doctype'] = 'json'
-    dict['xmlVersion'] = '1.8'
-    dict['keyfrom'] = 'fanyi.web'
-    dict['ue'] = 'UTF-8'
-    dict['action'] = 'FY_BY_CLICKBUTTON'
-    dict['typoResult'] = 'true'
-    dict['i'] = text
-    data = urllib.parse.urlencode(dict).encode('utf-8')
-    response = urllib.request.urlopen(url_youdao, data)
-    content = response.read().decode('utf-8')
-    data = json.loads(content)
-    result = data['translateResult'][0][0]['tgt']
+    appid = '20230422001651410'
+    secretKey = 'OKQRF1aKbUhQc7nAIGE3'
     
-    return result
+    httpClient = None
+    myurl = '/api/trans/vip/translate'
+    fromLang = 'auto'
+    toLang = 'zh'
+    salt = random.randint(32768, 65536)
+
+    sign = appid + text + str(salt) + secretKey
+    m1 = hashlib.md5()
+    m1.update(sign.encode("utf-8"))
+    sign = m1.hexdigest()
+
+    myurl = myurl+'?appid='+appid+'&q='+parse.quote(text)+'&from='+fromLang+'&to='+toLang+'&salt='+str(salt)+'&sign='+sign
+
+    try:
+        httpClient = http.client.HTTPConnection('api.fanyi.baidu.com')
+        httpClient.request('GET', myurl)
+        response = httpClient.getresponse()
+
+        #转码
+        html = response.read().decode('utf-8')
+        html = json.loads(html)
+        dst = html["trans_result"][0]["dst"]
+        return dst
+    except Exception as e:
+        print(e)
+    finally:
+        if httpClient:
+            httpClient.close()
+
 
 @CheckRequire
 def message_translate(req: HttpRequest):
