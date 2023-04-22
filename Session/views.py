@@ -244,6 +244,19 @@ def message(req: HttpRequest, id: int):
                 info["type"] = "message"
                 info["message"] = ""
 
+            user_binds = UserAndSession.objects.filter(session = session)
+            time_list = {}
+
+            for user_bind in user_binds:
+                user = user_bind.user
+                user_name = user.name
+
+                timestamp = user_bind.read_time
+
+                time_list[user_name] = timestamp
+
+            info["readTimeList"] = time_list
+
             session_info.append(info)
 
         def get_time(info):
