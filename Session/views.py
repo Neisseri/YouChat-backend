@@ -269,10 +269,16 @@ def message(req: HttpRequest, id: int):
     elif req.method == "POST":
         user = User.objects.filter(user_id = id).first()
 
+        if not user:
+            return request_failed(2, "User Not Existed", 400)
+
         body = json.loads(req.body.decode("utf-8"))
 
         session_id = body["sessionId"]
         session = Session.objects.get(session_id = session_id)
+
+        if not session:
+            return request_failed(3, "Session Not Existed", 400)
 
         timestamp = body["readTime"]
 
