@@ -324,7 +324,7 @@ def translate2chinese(language, text):
         dst = html["trans_result"][0]["dst"]
         return dst
     except Exception as e:
-        print(e)
+        return e
     finally:
         if httpClient:
             httpClient.close()
@@ -332,6 +332,8 @@ def translate2chinese(language, text):
 
 @CheckRequire
 def message_translate(req: HttpRequest):
+
+    # https://www.deepl.com/zh/pro-api/
 
     if req.method == 'PUT':
         body = json.loads(req.body.decode('utf-8'))
