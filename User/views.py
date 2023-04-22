@@ -538,3 +538,8 @@ def profile(req: HttpRequest, id: any):
     
     else:
         return BAD_METHOD
+
+
+@CheckRequire
+def user_image(req: HttpRequest):
+    return request_success()
