@@ -252,6 +252,22 @@ def message(req: HttpRequest, id: int):
         session_info.sort(key=get_time)
 
         return request_success({"data": session_info})
+    
+    elif req.method == "POST":
+        user = User.objects.filter(user_id = id).first()
+
+        body = json.loads(req.body.decode("utf-8"))
+
+        session_id = body["sessionId"]
+        session = Session.objects.get(session_id = session_id)
+
+        timestamp = body["readTime"]
+
+        bond = UserAndSession.objects.filter(user = user, session = session)
+
+        bond.read_time = timestamp
+
+        bond.save()
 
     else:
         return BAD_METHOD
