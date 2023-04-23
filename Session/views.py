@@ -14,6 +14,8 @@ import http.client
 import hashlib
 from urllib import parse
 import random
+import uuid
+import time
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -269,21 +271,43 @@ def message(req: HttpRequest, id: int):
 
 def translate2chinese(language, text):
 
-    url = 'http://fanyi.youdao.com/translate'
+    youdao_url = 'https://openapi.youdao.com/api'   # 有道api地址
+
+    # 需要翻译的文本'
+    translate_text = text
+
+    # 翻译文本生成sign前进行的处理
+    input_text = ""
+
+    # 当文本长度小于等于20时，取文本
+    if(len(translate_text) <= 20):
+        input_text = translate_text
+        
+    # 当文本长度大于20时，进行特殊处理
+    elif(len(translate_text) > 20):
+        input_text = translate_text[:10] + str(len(translate_text)) + translate_text[-10:]
+        
+    time_curtime = int(time.time())   # 秒级时间戳获取
+    app_id = "370b2d1bac6778ea"   # 应用id
+    uu_id = uuid.uuid4()   # 随机生成的uuid数，为了每次都生成一个不重复的数。
+    app_key = "Ibip0pFh5u1LDSZNgWjFMEkbiCrCmaxO"   # 应用密钥
+
+    sign = hashlib.sha256((app_id + input_text + str(uu_id) + str(time_curtime) + app_key).encode('utf-8')).hexdigest()   # sign生成
+
+
     data = {
-        "i": text,  # 待翻译的字符串
-        "from": "AUTO",
-        "to": "Chinese",
-        "smartresult": "dict",
-        "client": "fanyideskweb",
-        "salt": "16081210430989",
-        "doctype": "json",
-        "version": "2.1",
-        "keyfrom": "fanyi.web",
-        "action": "FY_BY_CLICKBUTTION"
+        'q':translate_text,   # 翻译文本
+        'from':"en",   # 源语言
+        'to':"zh-CHS",   # 翻译语言
+        'appKey':app_id,   # 应用id
+        'salt':uu_id,   # 随机生产的uuid码
+        'sign':sign,   # 签名
+        'signType':"v3",   # 签名类型，固定值
+        'curtime':time_curtime,   # 秒级时间戳
     }
-    res = requests.post(url, data=data).json()
-    return res['translateResult'][0][0]['tgt']
+
+    r = requests.get(youdao_url, params = data).json()   # 获取返回的json()内容
+    return r["translation"][0]   # 获取翻译内容
 
 
 @CheckRequire
