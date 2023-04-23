@@ -82,6 +82,35 @@ def manage_chatroom(req: HttpRequest):
         return request_failed(-1, 'Bad Method', 400)
 
 @CheckRequire
+def setting(req: HttpRequest):
+
+    if req.method == "PUT":
+        body = json.loads(req.body.decode("utf-8"))
+
+        user_id = body["userId"]
+        session_id = body["sessionId"]
+        isMute = body["isMute"]
+        isTop = body["isTop"]
+
+        user = User.objects.get(user_id = user_id)
+        session = Session.objects.get(session_id = session_id)
+
+        if not user or not session:
+            return request_failed(2, "Set Failed", 400)
+        
+        bond = UserAndSession.objects.filter(user = user, session = session).first()
+        bond.isMute = isMute
+        bond.isTop = isTop
+        bond.save()
+
+        return request_success()
+
+    else:
+        return request_failed(-1, 'Bad Method', 400)
+
+        
+
+@CheckRequire
 def join_chatroom(req: HttpRequest):
 
     if req.method == "GET":
@@ -229,9 +258,11 @@ def message(req: HttpRequest, id: int):
             info = {}
             info["sessionId"] = session.session_id
             info["sessionName"] = session.name
-            info["isTop"] = session.isTop
-            info["isMute"] = session.isMute
             info["sessionType"] = session.type
+
+            single_bond = UserAndSession.objects.filter(user = user, session = session).first()
+            info["isTop"] = single_bond.isTop
+            info["isMute"] = single_bond.isMute
             
             message = Message.objects.filter(session=session)
             if message:

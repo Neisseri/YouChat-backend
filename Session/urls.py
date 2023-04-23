@@ -7,4 +7,5 @@ urlpatterns = [
     path('image/<user_id>', views.transmit_img),
     path('message/translate', views.message_translate),
     path('message/<id>', views.message),
+    path('setting', views.setting),
 ]

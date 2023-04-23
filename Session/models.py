@@ -17,8 +17,6 @@ class Session(models.Model):
     friend_contacts = models.ForeignKey(Contacts, on_delete=models.CASCADE)
 
     host = models.ForeignKey(User, on_delete=models.CASCADE)
-    isTop = models.BooleanField(default=False)
-    isMute = models.BooleanField(default=False)
 
     class Meta:
         indexes = [models.Index(fields=["name"])]
@@ -31,6 +29,9 @@ class UserAndSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     permission = models.IntegerField()
+    
+    isTop = models.BooleanField(default=False)
+    isMute = models.BooleanField(default=False)
     
     read_time = models.FloatField(default=utils_time.get_timestamp)
     
