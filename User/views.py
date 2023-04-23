@@ -559,6 +559,7 @@ def transmit_img(req: HttpRequest, user_id):
         response = {
             'code': 0,
 	        'info': 'Upload Success',
+            'user_id': user.user_id,
             'img': user.portrait
         }
         return request_success(response)
