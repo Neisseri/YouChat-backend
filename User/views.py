@@ -8,8 +8,7 @@ from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
-from constants.session import SESSION_HOST, SESSION_MEMBER, SESSION_MANAGER, SESSION_REQUEST, FRIEDN_SESSION, BUILT_SESSION
-import base64
+from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION
 
 email2vcode = []
 
@@ -555,7 +554,8 @@ def transmit_img(req: HttpRequest, user_id):
             return HttpResponse(response)
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
-        user.portrait = base64.b64decode(img)
+        user.portrait = img
+        # save the raw base64 string
         response = {
             'code': 0,
 	        'info': 'Upload Success',
