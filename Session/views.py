@@ -297,7 +297,7 @@ def translate2chinese(language, text):
 
     data = {
         'q':translate_text,   # 翻译文本
-        'from':"en",   # 源语言
+        'from':"auto",   # 源语言
         'to':"zh-CHS",   # 翻译语言
         'appKey':app_id,   # 应用id
         'salt':uu_id,   # 随机生产的uuid码
