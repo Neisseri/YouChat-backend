@@ -11,5 +11,5 @@ urlpatterns = [
     path('profile/<id>', views.profile),
     path('modify/email', views.modify_email),
     path('modify', views.modify),
-    path('img/<id>', views.transmit_img)
+    path('img/<user_id>', views.transmit_img)
 ]

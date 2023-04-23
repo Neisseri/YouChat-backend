@@ -10,6 +10,12 @@ import json
 import base64
 import requests
 import urllib.parse, urllib.request
+import http.client
+import hashlib
+from urllib import parse
+import random
+import uuid
+import time
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -208,35 +214,7 @@ def join_chatroom(req: HttpRequest):
 
     else:
         return request_success()
-
-@CheckRequire
-def transmit_img(req: HttpRequest, user_id):
-
-    # receive an image from front-end
-    if req.method == 'PUT':
-        user = User.objects.filter(user_id=user_id).first()
-        if not user:
-            response = {
-                'code': 2,
-                'info': 'Upload failed',
-            }
-            return HttpResponse(response)
-        body = json.loads(req.body.decode("utf-8"))
-        img = body['img']
-        user.portrait = base64.b64decode(img)
-        response = {
-            'code': 0,
-	        'info': 'Upload Success',
-        }
-        return HttpResponse(response)
     
-    elif req.method == 'GET':
-        user = User.objects.filter(user_id=user_id).first()
-        img = user.portrait
-        response = {
-            'img': img
-        }
-        return HttpResponse(response)
     
 @CheckRequire
 def message(req: HttpRequest, id: int):
@@ -324,38 +302,49 @@ def message(req: HttpRequest, id: int):
 
 def translate2chinese(language, text):
 
-    # reference: https://blog.csdn.net/qq_25691777/article/details/120823770#1_3
-    '''
-    data = { 'doctype': 'json', 'type': 'auto','i': text }
-    r = requests.get("http://fanyi.youdao.com/translate", params=data)
-    response = r.json()
-    result = response['translateResult'][0][0]
-    tgt = result['tgt']
-    return tgt
-    '''
+    youdao_url = 'https://openapi.youdao.com/api'   # 有道api地址
 
-    # reference: https://blog.csdn.net/whatday/article/details/106057309
-    url_youdao = 'http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=' \
-      'http://www.youdao.com/'
-    dict = {}
-    dict['type'] = 'AUTO'
-    dict['doctype'] = 'json'
-    dict['xmlVersion'] = '1.8'
-    dict['keyfrom'] = 'fanyi.web'
-    dict['ue'] = 'UTF-8'
-    dict['action'] = 'FY_BY_CLICKBUTTON'
-    dict['typoResult'] = 'true'
-    dict['i'] = text
-    data = urllib.parse.urlencode(dict).encode('utf-8')
-    response = urllib.request.urlopen(url_youdao, data)
-    content = response.read().decode('utf-8')
-    data = json.loads(content)
-    result = data['translateResult'][0][0]['tgt']
-    
-    return result
+    # 需要翻译的文本'
+    translate_text = text
+
+    # 翻译文本生成sign前进行的处理
+    input_text = ""
+
+    # 当文本长度小于等于20时，取文本
+    if(len(translate_text) <= 20):
+        input_text = translate_text
+        
+    # 当文本长度大于20时，进行特殊处理
+    elif(len(translate_text) > 20):
+        input_text = translate_text[:10] + str(len(translate_text)) + translate_text[-10:]
+        
+    time_curtime = int(time.time())   # 秒级时间戳获取
+    app_id = "370b2d1bac6778ea"   # 应用id
+    uu_id = uuid.uuid4()   # 随机生成的uuid数，为了每次都生成一个不重复的数。
+    app_key = "Ibip0pFh5u1LDSZNgWjFMEkbiCrCmaxO"   # 应用密钥
+
+    sign = hashlib.sha256((app_id + input_text + str(uu_id) + str(time_curtime) + app_key).encode('utf-8')).hexdigest()   # sign生成
+
+
+    data = {
+        'q':translate_text,   # 翻译文本
+        'from':"auto",   # 源语言
+        'to':"zh-CHS",   # 翻译语言
+        'appKey':app_id,   # 应用id
+        'salt':uu_id,   # 随机生产的uuid码
+        'sign':sign,   # 签名
+        'signType':"v3",   # 签名类型，固定值
+        'curtime':time_curtime,   # 秒级时间戳
+    }
+
+    r = requests.get(youdao_url, params = data).json()   # 获取返回的json()内容
+    return r["translation"][0]   # 获取翻译内容
+
 
 @CheckRequire
 def message_translate(req: HttpRequest):
+
+    # https://www.deepl.com/zh/pro-api/
 
     if req.method == 'PUT':
         body = json.loads(req.body.decode('utf-8'))
