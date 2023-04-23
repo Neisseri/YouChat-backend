@@ -269,37 +269,21 @@ def message(req: HttpRequest, id: int):
 
 def translate2chinese(language, text):
 
-    appid = '20230422001651410'
-    secretKey = 'OKQRF1aKbUhQc7nAIGE3'
-    
-    httpClient = None
-    myurl = '/api/trans/vip/translate'
-    fromLang = 'auto'
-    toLang = 'zh'
-    salt = random.randint(32768, 65536)
-
-    sign = appid + text + str(salt) + secretKey
-    m1 = hashlib.md5()
-    m1.update(sign.encode("utf-8"))
-    sign = m1.hexdigest()
-
-    myurl = myurl+'?appid='+appid+'&q='+parse.quote(text)+'&from='+fromLang+'&to='+toLang+'&salt='+str(salt)+'&sign='+sign
-
-    try:
-        httpClient = http.client.HTTPConnection('api.fanyi.baidu.com')
-        httpClient.request('GET', myurl)
-        response = httpClient.getresponse()
-
-        #转码
-        html = response.read().decode('utf-8')
-        html = json.loads(html)
-        dst = html["trans_result"][0]["dst"]
-        return dst
-    except Exception as e:
-        return e
-    finally:
-        if httpClient:
-            httpClient.close()
+    url = 'http://fanyi.youdao.com/translate'
+    data = {
+        "i": text,  # 待翻译的字符串
+        "from": "AUTO",
+        "to": "AUTO",
+        "smartresult": "dict",
+        "client": "fanyideskweb",
+        "salt": "16081210430989",
+        "doctype": "json",
+        "version": "2.1",
+        "keyfrom": "fanyi.web",
+        "action": "FY_BY_CLICKBUTTION"
+    }
+    res = requests.post(url, data=data).json()
+    return res['translateResult'][0][0]['tgt']
 
 
 @CheckRequire
