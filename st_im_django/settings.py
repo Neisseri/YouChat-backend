@@ -89,64 +89,51 @@ ASGI_APPLICATION = 'st_im_django.routing.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '66666666',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "data"/ "db.sqlite3",
     },
     'TEST': {
         'NAME': 'test',
     }
 }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "data"/ "db.sqlite3",
-#     },
-#     'TEST': {
-#         'NAME': 'test',
-#     }
-# }
-# if os.getenv('DEPLOY') == None:
-#     # DATABASES = {
-#     #     'default': {
-#     #         'ENGINE': 'django.db.backends.postgresql',
-#     #         'NAME': 'postgres',
-#     #         'USER': 'postgres',
-#     #         'PASSWORD': '66666666',
-#     #         'HOST': '127.0.0.1',
-#     #         'PORT': '5432',
-#     #     },
-#     #     'TEST': {
-#     #         'NAME': 'test',
-#     #     }
-#     # }
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': 'backend',
-#             'USER': 'backend',
-#             'PASSWORD': '66666666',
-#             'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
-#             'PORT': '5432',
-#         },
-#     }
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': 'backend',
-#             'USER': 'backend',
-#             'PASSWORD': '66666666',
-#             'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
-#             'PORT': '5432',
-#         },
-#     }
+if os.getenv('DEPLOY') == None:
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': 'postgres',
+    #         'USER': 'postgres',
+    #         'PASSWORD': '66666666',
+    #         'HOST': '127.0.0.1',
+    #         'PORT': '5432',
+    #     },
+    #     'TEST': {
+    #         'NAME': 'test',
+    #     }
+    # }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'backend',
+            'USER': 'backend',
+            'PASSWORD': '66666666',
+            'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+            'PORT': '5432',
+        },
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'backend',
+            'USER': 'backend',
+            'PASSWORD': '66666666',
+            'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+            'PORT': '5432',
+        },
+    }
     
 
 
