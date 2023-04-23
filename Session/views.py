@@ -183,36 +183,7 @@ def join_chatroom(req: HttpRequest):
 
     else:
         return request_success()
-
-@CheckRequire
-def transmit_img(req: HttpRequest, id):
-    # Remark: this parameter should be `id` for consistent
-
-    # receive an image from front-end
-    if req.method == 'PUT':
-        user = User.objects.filter(user_id=id).first()
-        if not user:
-            response = {
-                'code': 2,
-                'info': 'Upload failed',
-            }
-            return HttpResponse(response)
-        body = json.loads(req.body.decode("utf-8"))
-        img = body['img']
-        user.portrait = base64.b64decode(img)
-        response = {
-            'code': 0,
-	        'info': 'Upload Success',
-        }
-        return HttpResponse(response)
     
-    elif req.method == 'GET': # send an image to front end
-        user = User.objects.filter(user_id=id).first()
-        img = user.portrait
-        response = {
-            'img': img
-        }
-        return HttpResponse(response)
     
 @CheckRequire
 def message(req: HttpRequest, id: int):
