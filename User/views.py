@@ -565,8 +565,8 @@ def transmit_img(req: HttpRequest, user_id):
     
     elif req.method == 'GET':
         user = User.objects.filter(user_id=user_id).first()
-        img = user.portrait
         response = {
-            'img': img
+            'user_id': user.user_id,
+            'img': user.portrait
         }
         return request_success(response)
