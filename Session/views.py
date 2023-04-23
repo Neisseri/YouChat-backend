@@ -273,7 +273,7 @@ def translate2chinese(language, text):
     data = {
         "i": text,  # 待翻译的字符串
         "from": "AUTO",
-        "to": "AUTO",
+        "to": "Chinese",
         "smartresult": "dict",
         "client": "fanyideskweb",
         "salt": "16081210430989",
