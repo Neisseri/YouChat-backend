@@ -114,7 +114,23 @@ def setting(req: HttpRequest):
     else:
         return request_failed(-1, 'Bad Method', 400)
 
+@CheckRequire
+def image(req: HttpRequest):
+    if req.method == "GET":
+        image_id = req.GET.get("id")
+
+        message = Message.objects.get(message_id = image_id)
+
+        if not message or message.message_type != "photo":
+            return request_failed(2, "Image Not Existed", 400)
         
+        return request_success({"image": message.text})
+    
+    elif req.method == "PUT":
+        456
+
+    else:
+        return request_failed(-1, 'Bad Method', 400)
 
 @CheckRequire
 def join_chatroom(req: HttpRequest):
