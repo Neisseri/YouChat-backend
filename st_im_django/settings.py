@@ -117,20 +117,20 @@ if os.getenv('DEPLOY') == None:
             'NAME': 'only4test.sqlite'
         },
     }
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': 'backend',
-    #         'USER': 'backend',
-    #         'PASSWORD': '66666666',
-    #         'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
-    #         'PORT': '5432',
-    #     },
-    #     'TEST': {
-    #         "ENGINE": "django.db.backends.sqlite3",
-    #         'NAME': 'test',
-    #     }
-    # }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'backend',
+            'USER': 'backend',
+            'PASSWORD': '66666666',
+            'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+            'PORT': '5432',
+        },
+        'TEST': {
+            "ENGINE": "django.db.backends.sqlite3",
+            'NAME': 'test',
+        }
+    }
 else:
     DATABASES = {
         'default': {
