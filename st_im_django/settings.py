@@ -99,7 +99,7 @@ DATABASES = {
         'NAME': 'test',
     }
 }
-if os.getenv('DEPLOY') == None:
+if os.getenv('DEPLOY') is None:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -207,7 +207,7 @@ CHANNEL_LAYERS = {
 
 CSRF_TRUSTED_ORIGINS = ['http://st-im-next-swimtogether.app.secoder.net', 'http://localhost:3000', 'https://st-im-next-swimtogether.app.secoder.net', 'https://localhost:3000']
 
-if 'test' in sys.argv:
+if 'test' in sys.argv or os.getenv("TEST") is not None:
     DATABASES['default'] = {
         "ENGINE": "django.db.backends.sqlite3",
     }
