@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -110,8 +110,12 @@ if os.getenv('DEPLOY') == None:
     #         'PORT': '5432',
     #     },
     #     'TEST': {
-    #         'NAME': 'test',
-    #     }
+    #         'MIRROR': 'test'
+    #     },
+    #     'test': {
+    #         'ENGINE': 'django.db.backends.sqlite3',
+    #         'NAME': 'only4test.sqlite'
+    #     },
     # }
     DATABASES = {
         'default': {
@@ -122,6 +126,10 @@ if os.getenv('DEPLOY') == None:
             'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
             'PORT': '5432',
         },
+        'TEST': {
+            "ENGINE": "django.db.backends.sqlite3",
+            'NAME': 'test',
+        }
     }
 else:
     DATABASES = {
@@ -133,6 +141,10 @@ else:
             'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
             'PORT': '5432',
         },
+        'TEST': {
+            "ENGINE": "django.db.backends.sqlite3",
+            'NAME': 'test',
+        }
     }
     
 
@@ -194,3 +206,8 @@ CHANNEL_LAYERS = {
 }
 
 CSRF_TRUSTED_ORIGINS = ['http://st-im-next-swimtogether.app.secoder.net', 'http://localhost:3000', 'https://st-im-next-swimtogether.app.secoder.net', 'https://localhost:3000']
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        "ENGINE": "django.db.backends.sqlite3",
+    }
