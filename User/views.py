@@ -555,6 +555,7 @@ def transmit_img(req: HttpRequest, user_id):
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
         user.portrait = img
+        user.save()
         # save the raw base64 string
         response = {
             'code': 0,
