@@ -210,4 +210,5 @@ CSRF_TRUSTED_ORIGINS = ['http://st-im-next-swimtogether.app.secoder.net', 'http:
 if 'test' in sys.argv or os.getenv("TEST") is not None:
     DATABASES['default'] = {
         "ENGINE": "django.db.backends.sqlite3",
+        'NAME': 'only4test.sqlite',
     }
