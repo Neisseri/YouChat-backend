@@ -16,6 +16,7 @@ from urllib import parse
 import random
 import uuid
 import time
+from WebSocket.consumers import MyConsumer
 
 # check if the char is a number or English letter
 def check_number_letter(c: any):
@@ -125,9 +126,6 @@ def image(req: HttpRequest):
             return request_failed(2, "Image Not Existed", 400)
         
         return request_success({"image": message.text})
-    
-    elif req.method == "PUT":
-        456
 
     else:
         return request_failed(-1, 'Bad Method', 400)
