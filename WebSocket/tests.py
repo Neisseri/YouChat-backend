@@ -47,25 +47,6 @@ class WebSocketTests(TestCase):
         userAndSession2.save()
 
         pass
-        
-    async def test_my_consumer_user_not_exist(self):
-        application = URLRouter([
-            path('ws/message/', MyConsumer.as_asgi()),
-        ])
-        communicator = WebsocketCommunicator(application, "/ws/message/")
-        connected, subprotocol = await communicator.connect()
-        assert connected
-        # Test sending text
-        send_message = {
-            "type": "user_auth",
-            "id": 3
-        }
-        await communicator.send_json_to(send_message)
-        response = await communicator.receive_json_from()
-        recv_message = {"code": 1, "info": "User Not Existed"}
-        assert response == recv_message
-        # Close
-        await communicator.disconnect()
 
     async def test_my_consumer(self):
         application = URLRouter([
@@ -106,5 +87,54 @@ class WebSocketTests(TestCase):
         await communicator1.disconnect()
         await communicator2.disconnect()
 
+    async def test_my_consumer_user_not_exist(self):
+        application = URLRouter([
+            path('ws/message/', MyConsumer.as_asgi()),
+        ])
+        communicator = WebsocketCommunicator(application, "/ws/message/")
+        connected, subprotocol = await communicator.connect()
+        assert connected
+        # Test sending text
+        send_message = {
+            "type": "user_auth",
+            "id": 3
+        }
+        await communicator.send_json_to(send_message)
+        response = await communicator.receive_json_from()
+        recv_message = {"code": 1, "info": "User Not Existed"}
+        assert response == recv_message
+        # Close
+        await communicator.disconnect()
 
+    async def test_my_consumer_session_not_exist(self):
+        application = URLRouter([
+            path('ws/message/', MyConsumer.as_asgi()),
+        ])
+        communicator = WebsocketCommunicator(application, "/ws/message/")
+        connected, subprotocol = await communicator.connect()
+        assert connected
+        # Test sending text
+        send_message = {
+            "type": "user_auth",
+            "id": 1
+        }
+        await communicator.send_json_to(send_message)
+        response = await communicator.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "user_auth"
+        }
+        assert response == recv_message
+        send_message = {
+            "type": "pull",
+            "id": 1,
+            "sessionId": 114514,
+            "messageScale": 30 
+        }
+        await communicator.send_json_to(send_message)
+        response = await communicator.receive_json_from()
+        recv_message = {"code": 2, "info": "Session Not Existed"}
+        #Close
+        await communicator.disconnect()
     
