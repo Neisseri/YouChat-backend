@@ -36,6 +36,9 @@ unit-test:
     - python3 manage.py makemigrations User
     - python3 manage.py makemigrations Session
     - python3 manage.py migrate
+    - DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y redis-server
+    - redis-server /opt/tmp/redis.conf
+    - sleep 5
     - sh test.sh
     # TODO End: [Student] Migrate and run tests
   after_script:

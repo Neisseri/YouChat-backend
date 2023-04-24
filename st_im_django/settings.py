@@ -100,37 +100,37 @@ DATABASES = {
     }
 }
 if os.getenv('DEPLOY') == None:
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': 'postgres',
-    #         'USER': 'postgres',
-    #         'PASSWORD': '66666666',
-    #         'HOST': '127.0.0.1',
-    #         'PORT': '5432',
-    #     },
-    #     'TEST': {
-    #         'MIRROR': 'test'
-    #     },
-    #     'test': {
-    #         'ENGINE': 'django.db.backends.sqlite3',
-    #         'NAME': 'only4test.sqlite'
-    #     },
-    # }
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'backend',
-            'USER': 'backend',
+            'NAME': 'postgres',
+            'USER': 'postgres',
             'PASSWORD': '66666666',
-            'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+            'HOST': '127.0.0.1',
             'PORT': '5432',
         },
         'TEST': {
-            "ENGINE": "django.db.backends.sqlite3",
-            'NAME': 'test',
-        }
+            'MIRROR': 'test'
+        },
+        'test': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'only4test.sqlite'
+        },
     }
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': 'backend',
+    #         'USER': 'backend',
+    #         'PASSWORD': '66666666',
+    #         'HOST': 'ST-IM-Postgres.SwimTogether.secoder.local',
+    #         'PORT': '5432',
+    #     },
+    #     'TEST': {
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         'NAME': 'test',
+    #     }
+    # }
 else:
     DATABASES = {
         'default': {
