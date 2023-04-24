@@ -23,8 +23,6 @@ class WebSocketTests(TestCase):
         #                             nickname = "Bob", email = "11@swim.com")
         pass
         
-    @pytest.mark.django_db(transaction=True)
-    @pytest.mark.asyncio
     async def test_my_consumer(self):
         application = URLRouter([
             path('ws/message/', MyConsumer.as_asgi()),
