@@ -287,8 +287,8 @@ def friends_put(req: HttpRequest):
                     session.save()
                     bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
                     bond.save()
-                    bond = UserAndSession(permission = SESSION_MANAGER, user = target, session = session)
-                    bond.save()
+                    bond1 = UserAndSession(permission = SESSION_MANAGER, user = target, session = session)
+                    bond1.save()
                 
                 request.delete()
             
