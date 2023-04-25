@@ -148,6 +148,7 @@ def join_chatroom(req: HttpRequest):
             info = {}
             info["id"] = user.user_id
             info["nickname"] = user.nickname
+            info["readTime"] = bond.read_time
             info["role"] = bond.permission
 
             members.append(info)
@@ -248,7 +249,7 @@ def message(req: HttpRequest, id: int):
         session_info = []
         for bond in sessionsbond:
             session = bond.session
-            
+
             info = {}
             info["sessionId"] = session.session_id
             info["sessionName"] = session.name
@@ -261,25 +262,27 @@ def message(req: HttpRequest, id: int):
             if message:
                 message = message.order_by("-time").first()
                 info["timestamp"] = message.time
-                info["type"] = message.type
+                info["type"] = message.message_type
+                info["lastSender"] = message.sender.name
                 info["message"] = message.text
             else:
                 info["timestamp"] = session.time
-                info["type"] = "message"
+                info["type"] = "text"
+                info["lastSender"] = ""
                 info["message"] = ""
 
-            user_binds = UserAndSession.objects.filter(session = session)
-            time_list = {}
+            # user_binds = UserAndSession.objects.filter(session = session)
+            # time_list = {}
 
-            for user_bind in user_binds:
-                user = user_bind.user
-                user_name = user.name
+            # for user_bind in user_binds:
+            #     user = user_bind.user
+            #     user_name = user.name
 
-                timestamp = user_bind.read_time
+            #     timestamp = user_bind.read_time
 
-                time_list[user_name] = timestamp
+            #     time_list[user_name] = timestamp
 
-            info["readTimeList"] = time_list
+            # info["readTimeList"] = time_list
 
             session_info.append(info)
 
