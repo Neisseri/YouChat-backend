@@ -212,3 +212,8 @@ if 'test' in sys.argv or os.getenv("TEST") is not None:
         "ENGINE": "django.db.backends.sqlite3",
         'NAME': 'only4test.sqlite',
     }
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
