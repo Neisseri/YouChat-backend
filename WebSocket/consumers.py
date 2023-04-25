@@ -203,7 +203,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        date1 = datetime.fromtimestamp(time)
+        date1 = datetime.datetime.fromtimestamp(time)
         date2 = datetime.datetime.now()
         seconds = (date2 - date1).total_seconds()
 
@@ -215,7 +215,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         response = {
 	        "code": 0,
 	        "info": "Succeed",
-	        "type": "send",
+	        "type": "delete",
 	        "messageId": message_id
         }
 

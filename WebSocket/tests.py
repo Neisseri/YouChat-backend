@@ -7,6 +7,7 @@ from websockets.sync.client import connect
 from django.http import HttpResponse, HttpRequest
 import time
 import pytest
+import time
 
 from channels.testing import WebsocketCommunicator
 from WebSocket.consumers import MyConsumer
@@ -84,10 +85,12 @@ class WebSocketTests(TestCase):
         }
         assert response2 == recv_message
 
+        timestamp = time.time()
+
         send_message_1 = {
             "type": "send",
             "sessionId": 1,
-            "timestamp": 1234567890.1234,
+            "timestamp": timestamp,
             "message": "Hello World",
             "messageType": "text"
         }
@@ -99,12 +102,54 @@ class WebSocketTests(TestCase):
             "type": "send",
             "sessionId": 1,
             "senderId": 1,
-            "timestamp": 1234567890.1234,
+            "timestamp": timestamp,
             "messageId": 1,
             "message": "Hello World",
             "messageType": "text"
         }
         assert response1 == recv_message
+
+        response2 = await communicator2.receive_json_from()
+        assert response2 == recv_message
+
+        send_message = {
+            "type": "pull",
+            "id": 1,
+            "sessionId": 1,
+            "messageScale": 30 
+        }
+        await communicator1.send_json_to(send_message)
+        response = await communicator1.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "pull",
+            "messages": [
+                {
+                    "senderId": 1,
+                    "timestamp": timestamp,
+                    "messageId": 1,
+                    "message": "Hello World",
+                    "messageType": "text"
+                }
+            ]
+        }
+        assert response == recv_message
+
+        send_message = {
+            "type": "delete",
+            "id": 1,
+            "messageId": 1
+        }
+        await communicator1.send_json_to(send_message)
+        response = await communicator1.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "delete",
+            "messageId": 1
+        }
+        assert response == recv_message
 
         response2 = await communicator2.receive_json_from()
         assert response2 == recv_message
@@ -161,6 +206,7 @@ class WebSocketTests(TestCase):
         await communicator.send_json_to(send_message)
         response = await communicator.receive_json_from()
         recv_message = {"code": 2, "info": "Session Not Existed"}
+        assert response == recv_message
         #Close
         await communicator.disconnect()
 
