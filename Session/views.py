@@ -248,6 +248,7 @@ def message(req: HttpRequest, id: int):
         session_info = []
         for bond in sessionsbond:
             session = bond.session
+            
             info = {}
             info["sessionId"] = session.session_id
             info["sessionName"] = session.name
