@@ -106,6 +106,10 @@ def setting(req: HttpRequest):
             return request_failed(2, "Set Failed", 400)
         
         bond = UserAndSession.objects.filter(user = user, session = session).first()
+
+        if not bond:
+            return request_failed(2, "Set Failed", 400)
+
         bond.isMute = isMute
         bond.isTop = isTop
         bond.save()
@@ -253,6 +257,8 @@ def message(req: HttpRequest, id: int):
             info["sessionType"] = session.type
 
             single_bond = UserAndSession.objects.filter(user = user, session = session).first()
+            if not single_bond:
+                return request_failed(2, "not bond bug here", 400)
             info["isTop"] = single_bond.isTop
             info["isMute"] = single_bond.isMute
             
