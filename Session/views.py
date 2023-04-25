@@ -316,11 +316,11 @@ def message(req: HttpRequest, id: int):
     else:
         return BAD_METHOD
 
-def translate2chinese(language, text):
+def translate2chinese(text):
 
     youdao_url = 'https://openapi.youdao.com/api'   # 有道api地址
 
-    # 需要翻译的文本'
+    # 需要翻译的文本
     translate_text = text
 
     # 翻译文本生成sign前进行的处理
@@ -361,13 +361,11 @@ def translate2chinese(language, text):
 def message_translate(req: HttpRequest):
 
     # https://www.deepl.com/zh/pro-api/
-
     if req.method == 'PUT':
         body = json.loads(req.body.decode('utf-8'))
-        language = body['language']
         text = body['text']
             
-        translated_text = translate2chinese(language, text)
+        translated_text = translate2chinese(text)
         
         response = {
             'code': 0,
