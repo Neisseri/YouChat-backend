@@ -41,7 +41,7 @@ class UserAndSession(models.Model):
 
 class Message(models.Model):
     message_id = models.BigAutoField(primary_key=True)
-    text = models.CharField(max_length=MAX_MESSAGE_LENGTH, unique=False)
+    text = models.TextField(max_length=MAX_MESSAGE_LENGTH, unique=False)
     time = models.FloatField(default=utils_time.get_timestamp)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)

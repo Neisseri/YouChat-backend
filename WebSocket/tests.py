@@ -63,26 +63,52 @@ class WebSocketTests(TestCase):
             "id": 1
         }
         await communicator1.send_json_to(send_message_1)
-        response = await communicator1.receive_json_from()
+        response1 = await communicator1.receive_json_from()
         recv_message = {
             "code": 0,
             "info": "Succeed",
             "type": "user_auth"
         }
-        assert response == recv_message
+        assert response1 == recv_message
         
         send_message_2 = {
             "type": "user_auth",
             "id": 2
         }
         await communicator2.send_json_to(send_message_2)
-        #response = await communicator2.receive_json_from()
+        response2 = await communicator2.receive_json_from()
         recv_message = {
             "code": 0,
             "info": "Succeed",
             "type": "user_auth"
         }
-        assert response == recv_message
+        assert response2 == recv_message
+
+        send_message_1 = {
+            "type": "send",
+            "sessionId": 1,
+            "timestamp": 1234567890.1234,
+            "message": "Hello World",
+            "messageType": "text"
+        }
+        await communicator1.send_json_to(send_message_1)
+        response1 = await communicator1.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "send",
+            "sessionId": 1,
+            "senderId": 1,
+            "timestamp": 1234567890.1234,
+            "messageId": 1,
+            "message": "Hello World",
+            "messageType": "text"
+        }
+        assert response1 == recv_message
+
+        response2 = await communicator2.receive_json_from()
+        assert response2 == recv_message
+
         # Close
         await communicator1.disconnect()
         await communicator2.disconnect()
@@ -107,6 +133,38 @@ class WebSocketTests(TestCase):
         await communicator.disconnect()
 
     async def test_my_consumer_session_not_exist(self):
+        application = URLRouter([
+            path('ws/message/', MyConsumer.as_asgi()),
+        ])
+        communicator = WebsocketCommunicator(application, "/ws/message/")
+        connected, subprotocol = await communicator.connect()
+        assert connected
+        # Test sending text
+        send_message = {
+            "type": "user_auth",
+            "id": 1
+        }
+        await communicator.send_json_to(send_message)
+        response = await communicator.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "user_auth"
+        }
+        assert response == recv_message
+        send_message = {
+            "type": "pull",
+            "id": 1,
+            "sessionId": 114514,
+            "messageScale": 30 
+        }
+        await communicator.send_json_to(send_message)
+        response = await communicator.receive_json_from()
+        recv_message = {"code": 2, "info": "Session Not Existed"}
+        #Close
+        await communicator.disconnect()
+
+    async def test_my_consumer_delete_message_not_exist(self):
         application = URLRouter([
             path('ws/message/', MyConsumer.as_asgi()),
         ])

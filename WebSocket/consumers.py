@@ -250,25 +250,25 @@ class MyConsumer(AsyncWebsocketConsumer):
             id = text_data_json['id']
             await self.user_auth(id)
         elif type == 'pull':
-            id = dict(text_data_json).get('id')
-            if id:
-                await self.user_auth(id)
+            # id = dict(text_data_json).get('id')
+            # if id:
+            #     await self.user_auth(id)
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
             await self.message_pull(session_id, message_scale)
         elif type == 'send':
-            id = dict(text_data_json).get('id')
-            if id:
-                await self.user_auth(id)
+            # id = dict(text_data_json).get('id')
+            # if id:
+            #     await self.user_auth(id)
             session_id = text_data_json['sessionId']
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             message_type = text_data_json['messageType']
             await self.send_message(session_id, timestamp, text, message_type)
         elif type == 'delete':
-            id = dict(text_data_json).get('id')
-            if id:
-                await self.user_auth(id)
+            # id = dict(text_data_json).get('id')
+            # if id:
+            #     await self.user_auth(id)
             message_id = text_data_json['messageId']
             await self.group_delete_message(message_id)
             await self.delete_message(message_id)
