@@ -67,4 +67,44 @@ class WebSocketTests(TestCase):
         # Close
         await communicator.disconnect()
 
+    async def test_my_consumer(self):
+        application = URLRouter([
+            path('ws/message/', MyConsumer.as_asgi()),
+        ])
+        communicator1 = WebsocketCommunicator(application, "/ws/message/")
+        communicator2 = WebsocketCommunicator(application, "/ws/message/")
+        connected1, subprotocol1 = await communicator1.connect()
+        connected2, subprotocol1 = await communicator2.connect()
+        assert connected1, connected2
+        # Test sending text
+        send_message_1 = {
+            "type": "user_auth",
+            "id": 1
+        }
+        await communicator1.send_json_to(send_message_1)
+        response = await communicator1.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "user_auth"
+        }
+        assert response == recv_message
+        
+        send_message_2 = {
+            "type": "user_auth",
+            "id": 2
+        }
+        await communicator2.send_json_to(send_message_2)
+        #response = await communicator2.receive_json_from()
+        recv_message = {
+            "code": 0,
+            "info": "Succeed",
+            "type": "user_auth"
+        }
+        assert response == recv_message
+        # Close
+        await communicator1.disconnect()
+        await communicator2.disconnect()
+
+
     
