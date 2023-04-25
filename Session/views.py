@@ -244,23 +244,17 @@ def message(req: HttpRequest, id: int):
             return request_failed(2, "UserId Not Exists", 400)
 
         sessionsbond = UserAndSession.objects.filter(user = user)
-        
-        sessions = []
-        for bond in sessionsbond:
-            sessions.append(bond.session)
 
         session_info = []
-        for session in sessions:
+        for bond in sessionsbond:
+            session = bond.session
             info = {}
             info["sessionId"] = session.session_id
             info["sessionName"] = session.name
             info["sessionType"] = session.type
 
-            single_bond = UserAndSession.objects.filter(user = user, session = session).first()
-            if not single_bond:
-                return request_failed(2, "not bond bug here", 400)
-            info["isTop"] = single_bond.isTop
-            info["isMute"] = single_bond.isMute
+            info["isTop"] = bond.isTop
+            info["isMute"] = bond.isMute
             
             message = Message.objects.filter(session=session)
             if message:
