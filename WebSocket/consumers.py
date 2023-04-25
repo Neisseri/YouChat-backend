@@ -85,7 +85,8 @@ class MyConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def delete_message(self, message_id):
         message = Message.objects.filter(message_id=message_id).first()
-        message.delete()
+        if message:
+            message.delete()
 
     @database_sync_to_async
     def check_invalid_message(self, text):
@@ -181,20 +182,21 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     async def group_delete_message(self, message_id):
 
-        session_id = await self.get_session_id_by_message_id(message_id)
-        message = await self.get_message(message_id)
-        sender = await self.get_message_sender(message)
-        time = await self.get_message_time(message)
-
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
         
+        message = await self.get_message(message_id)
+        
         if not message:
             response_data = {"code": 2, "info": "Message Not Existed"}
             await self.send(text_data=json.dumps(response_data))
             return
+        
+        session_id = await self.get_session_id_by_message_id(message_id)
+        sender = await self.get_message_sender(message)
+        time = await self.get_message_time(message)
         
         if sender != self.user:
             response_data = {"code": 3, "info": "Permission Denied"}
