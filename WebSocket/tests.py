@@ -185,14 +185,14 @@ class WebSocketTests(TestCase):
         }
         assert response == recv_message
         send_message = {
-            "type": "pull",
+            "type": "delete",
             "id": 1,
-            "sessionId": 114514,
-            "messageScale": 30 
+            "messageId": 114514
         }
         await communicator.send_json_to(send_message)
         response = await communicator.receive_json_from()
-        recv_message = {"code": 2, "info": "Session Not Existed"}
+        recv_message = {"code": 2, "info": "Message Not Existed"}
+        assert response == recv_message
         #Close
         await communicator.disconnect()
     
