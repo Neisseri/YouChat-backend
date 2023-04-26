@@ -116,8 +116,8 @@ class SessionTests(TestCase):
     
     # Now start testcases
 
-    # get head portrait
-    def test_get_portrait(self):
+    # get image message
+    def test_get_image(self):
 
         random.seed(1)
         res = self.get_image(1)
@@ -335,3 +335,19 @@ class SessionTests(TestCase):
 
         self.assertEqual(res.json()['code'], 4)
         self.assertEqual(res.json()['info'], 'Already In Session')
+
+    def test_get_message(self):
+
+        random.seed(18)
+        res = self.get_message(3)
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(len(res.json()['data']), 1)
+        self.assertEqual(res.json()['data'][0]['sessionId'], 1)
+        self.assertEqual(res.json()['data'][0]['sessionName'], "friend")
+        self.assertEqual(res.json()['data'][0]['sessionType'], 1)
+        self.assertEqual(res.json()['data'][0]['type'], "photo")
+        self.assertEqual(res.json()['data'][0]['lastSender'], "swim14")
+        self.assertEqual(res.json()['data'][0]['isTop'], False)
+        self.assertEqual(res.json()['data'][0]['isMute'], False)
+    
