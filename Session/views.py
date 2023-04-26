@@ -26,23 +26,23 @@ def check_number_letter(c: any):
         return False
 
 # extract the fields in request.body for /user GET
-def check_for_session_data(body):
+# def check_for_session_data(body):
 
-    user_name = require(body, "userName", "string", err_msg="Missing or error type of [userName]")
-    session_name = require(body, "sessionName", "string", err_msg="Missing or error type of [sessionName]")
-    session_id = require(body, "sessionId", "int", err_msg="Missing or error type of [sessionId]")
-    message_scale = body["messageScale"] if "messageScale" in body.keys() else DEFAULT_MESSAGE_SCALE
+#     user_name = require(body, "userName", "string", err_msg="Missing or error type of [userName]")
+#     session_name = require(body, "sessionName", "string", err_msg="Missing or error type of [sessionName]")
+#     session_id = require(body, "sessionId", "int", err_msg="Missing or error type of [sessionId]")
+#     message_scale = body["messageScale"] if "messageScale" in body.keys() else DEFAULT_MESSAGE_SCALE
 
-    assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
-    assert 5 <= len(session_name) <= 20, "Bad length of [sessionName]"
+#     assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
+#     assert 5 <= len(session_name) <= 20, "Bad length of [sessionName]"
 
-    for i in range(0, len(user_name)):
-        assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
+#     for i in range(0, len(user_name)):
+#         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
         
-    for i in range(0, len(session_name)):
-        assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [sessionName]"
+#     for i in range(0, len(session_name)):
+#         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [sessionName]"
 
-    return user_name, session_name, session_id, message_scale
+#     return user_name, session_name, session_id, message_scale
 
 @CheckRequire
 def manage_chatroom(req: HttpRequest):
@@ -309,11 +309,13 @@ def message(req: HttpRequest, id: int):
 
         timestamp = body["readTime"]
 
-        bond = UserAndSession.objects.filter(user = user, session = session)
+        bond = UserAndSession.objects.filter(user = user, session = session).first()
 
         bond.read_time = timestamp
 
         bond.save()
+
+        return request_success()
 
     else:
         return BAD_METHOD
