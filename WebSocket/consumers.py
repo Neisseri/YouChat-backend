@@ -66,6 +66,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         for message in messages:
             message_data = {
                 "senderId": message.sender.user_id,
+                "senderName": message.sender.name,
                 "timestamp": message.time,
                 "messageId": message.message_id,
                 "message": message.text,
@@ -164,6 +165,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 	        "type": "send",
 	        "sessionId": session_id,
 	        "senderId": self.user_id,
+            "senderName": self.user.name,
 	        "timestamp": timestamp,
 	        "messageId": message_id,
 	        "message": text,
