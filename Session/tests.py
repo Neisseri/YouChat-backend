@@ -1,7 +1,7 @@
 from django.test import TestCase
 import random
-from Session.models import Session
-from User.models import User
+from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
+from Session.models import Session, UserAndSession
 
 # Create your tests here.
 class SessionTests(TestCase):
@@ -15,6 +15,35 @@ class SessionTests(TestCase):
         # bob
         User.objects.create(name = 'swim11', password = 'abc12345678', 
                                     nickname = 'Bob', email = '11@swim.com')
+        
+        carol = User.objects.create(name = "swim14", password = "abc1234567", 
+                                    nickname = "carol", email = "14@swim.com")
+        carol.save()
+        
+        dave = User.objects.create(name = "swim15", password = "abc12345678", 
+                                    nickname = "dave", email = "15@swim.com")
+        dave.save()
+        
+        userGroup1 = UserGroup.objects.create(user=carol)
+        userGroup1.save()
+
+        userGroup2 = UserGroup.objects.create(user=dave)
+        userGroup2.save()
+
+        contact1 = Contacts.objects.create(user=carol, friend=dave, group=userGroup1)
+        contact1.save()
+
+        contact2 = Contacts.objects.create(user=dave, friend=carol, group=userGroup2)
+        contact2.save()
+
+        session = Session.objects.create(name='friend', type=1, friend_contacts=contact1, host=carol)
+        session.save()
+
+        userAndSession1 = UserAndSession.objects.create(user=carol, session=session, permission=0)
+        userAndSession1.save()
+
+        userAndSession2 = UserAndSession.objects.create(user=dave, session=session, permission=1)
+        userAndSession2.save()
         
     # Utility Functions
     def get_image(self, user_id):
