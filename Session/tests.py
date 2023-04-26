@@ -90,6 +90,9 @@ class SessionTests(TestCase):
         }
         return self.client.post(f'/session/message/{user_id}', data=payload, content_type='application/json')
     
+    def get_chatroom(self, session_id):
+        return self.client.get(f'/session/chatroom?id={session_id}', content_type='application/json')
+    
     def put_chatroom(self, user_id, session_name, initial):
         payload = {
             'userId': user_id,
@@ -120,6 +123,13 @@ class SessionTests(TestCase):
             'applicantId': applicant_id
         }
         return self.client.put('/session/chatroom/Admin', data=payload, content_type='application/json')
+    
+    def put_translate(self, language, text):
+        payload = {
+            "language": language,
+            "text": text
+        }
+        return self.client.put('/session/message/translate', data=payload, content_type='application/json')
     
     # Now start testcases
 
@@ -162,6 +172,21 @@ class SessionTests(TestCase):
     def test_upload_portrait(seld):
 
         random.seed(2)
+
+    def test_get_chatroom(self):
+
+        random.seed(123)
+        res = self.get_chatroom(1)
+
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(res.json()['sessionName'], 'friend')
+        self.assertEqual(res.json()['members'][0]['id'], 3)
+        self.assertEqual(res.json()['members'][0]['nickname'], 'carol')
+        self.assertEqual(res.json()['members'][0]['role'], 0)
+        self.assertEqual(res.json()['members'][1]['id'], 4)
+        self.assertEqual(res.json()['members'][1]['nickname'], 'dave')
+        self.assertEqual(res.json()['members'][1]['role'], 1)
 
     # create chatroom
     def test_put_chatroom(self):
@@ -365,4 +390,12 @@ class SessionTests(TestCase):
         res = self.post_message(3, 1, timestamp)
         self.assertEqual(res.json()['info'], 'Succeed')
         self.assertEqual(res.json()['code'], 0)
+
+    def test_put_translate(self):
+
+        random.seed(19)
+        res = self.put_translate("English", "software engineering")
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
+        self.assertEqual(res.json()['text'], "软件工程")
         
