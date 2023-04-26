@@ -309,11 +309,13 @@ def message(req: HttpRequest, id: int):
 
         timestamp = body["readTime"]
 
-        bond = UserAndSession.objects.filter(user = user, session = session)
+        bond = UserAndSession.objects.filter(user = user, session = session).first()
 
         bond.read_time = timestamp
 
         bond.save()
+
+        return request_success()
 
     else:
         return BAD_METHOD

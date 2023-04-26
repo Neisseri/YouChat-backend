@@ -83,6 +83,13 @@ class SessionTests(TestCase):
     def get_message(self, user_id):
         return self.client.get(f'/session/message/{user_id}', content_type='application/json')
     
+    def post_message(self, user_id, session_id, read_time):
+        payload = {
+            "sessionId": session_id,
+            "readTime": read_time
+        }
+        return self.client.post(f'/session/message/{user_id}', data=payload, content_type='application/json')
+    
     def put_chatroom(self, user_id, session_name, initial):
         payload = {
             'userId': user_id,
@@ -350,4 +357,12 @@ class SessionTests(TestCase):
         self.assertEqual(res.json()['data'][0]['lastSender'], "swim14")
         self.assertEqual(res.json()['data'][0]['isTop'], False)
         self.assertEqual(res.json()['data'][0]['isMute'], False)
-    
+
+    def test_post_message(self):
+
+        random.seed(18)
+        timestamp = 1682509113
+        res = self.post_message(3, 1, timestamp)
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
+        
