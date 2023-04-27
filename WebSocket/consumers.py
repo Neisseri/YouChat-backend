@@ -11,12 +11,6 @@ import constants.session as constants
 
 import datetime
 
-# for voice communication
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-
 class MyConsumer(AsyncWebsocketConsumer):
     all_groups = {}
     
