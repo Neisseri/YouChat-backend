@@ -102,6 +102,7 @@ class WebSocketTests(TestCase):
             "type": "send",
             "sessionId": 1,
             "senderId": 1,
+            "senderName": "swim17",
             "timestamp": timestamp,
             "messageId": 1,
             "message": "Hello World",
@@ -127,6 +128,7 @@ class WebSocketTests(TestCase):
             "messages": [
                 {
                     "senderId": 1,
+                    "senderName": "swim17",
                     "timestamp": timestamp,
                     "messageId": 1,
                     "message": "Hello World",

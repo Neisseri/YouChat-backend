@@ -11,6 +11,12 @@ import constants.session as constants
 
 import datetime
 
+# for voice communication
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 class MyConsumer(AsyncWebsocketConsumer):
     all_groups = {}
     
@@ -66,6 +72,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         for message in messages:
             message_data = {
                 "senderId": message.sender.user_id,
+                "senderName": message.sender.name,
                 "timestamp": message.time,
                 "messageId": message.message_id,
                 "message": message.text,
@@ -164,6 +171,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 	        "type": "send",
 	        "sessionId": session_id,
 	        "senderId": self.user_id,
+            "senderName": self.user.name,
 	        "timestamp": timestamp,
 	        "messageId": message_id,
 	        "message": text,
