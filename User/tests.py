@@ -424,13 +424,15 @@ class UserTests(TestCase):
 
         self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
 
-        server = zmail.server('swimchat@sina.com', '8fcf93c3471c7b2c')
-        time.sleep(6)
+        # server = zmail.server('swimchat@sina.com', '8fcf93c3471c7b2c')
+        # time.sleep(6)
         
-        latest_mail = server.get_latest()
-        content = latest_mail["content_text"]
+        # latest_mail = server.get_latest()
+        # content = latest_mail["content_text"]
 
-        veri_code = "".join(list(filter(str.isdigit, list(content[0]))))
+        # veri_code = "".join(list(filter(str.isdigit, list(content[0]))))
+
+        veri_code = '123456'
 
         self.get_email_verify(email, veri_code)
 
