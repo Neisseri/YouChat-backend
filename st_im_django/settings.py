@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "WebSocket",
     "CSRF",
 
-    "webrtc",
+    "WebRTC",
 ]
 
 MIDDLEWARE = [
