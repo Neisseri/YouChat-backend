@@ -57,11 +57,24 @@ class MyConsumer(AsyncWebsocketConsumer):
         return time
 
     @database_sync_to_async
-    def get_messages(self, session_id, message_scale):
+    def get_messages(self, session_id, message_scale, timestamp):
         session = Session.objects.filter(session_id=session_id).first()
         if not session:
             return None
-        messages = Message.objects.filter(session=session).order_by("-time")[:message_scale]
+        messages = Message.objects.filter(session=session).order_by("-time")
+
+        def get_time_pos(messages, timestamp):
+            for pos in range(len(messages)):
+                message = messages[pos]
+                if message.time <= timestamp:
+                    return pos
+                
+            return len(messages)
+
+        timepos = get_time_pos(messages, timestamp)
+        lst_pos = timepos + message_scale if timepos + message_scale <= len(messages) else len(messages)
+        messages = messages[timepos : lst_pos]
+
         message_list = []
         for message in messages:
             message_data = {
@@ -122,7 +135,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(response_data))
 
     # pull message from specific session
-    async def message_pull(self, session_id, message_scale):
+    async def message_pull(self, session_id, message_scale, timestamp):
         
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
@@ -134,7 +147,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
 
-        message_list = await self.get_messages(session_id, message_scale)
+        message_list = await self.get_messages(session_id, message_scale, timestamp)
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         response_data["messages"] = message_list
         await self.send(text_data=json.dumps(response_data))
@@ -259,7 +272,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             #     await self.user_auth(id)
             session_id = text_data_json['sessionId']
             message_scale = text_data_json['messageScale']
-            await self.message_pull(session_id, message_scale)
+            timestamp = text_data_json['timestamp']
+            await self.message_pull(session_id, message_scale, timestamp)
         elif type == 'send':
             # id = dict(text_data_json).get('id')
             # if id:
