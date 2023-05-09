@@ -161,10 +161,9 @@ def join_chatroom(req: HttpRequest):
         body = json.loads(req.body.decode("utf-8"))
 
         user_id = body["userId"]
-        session_name = body["sessionName"]
         session_id = body["sessionId"]
 
-        session = Session.objects.filter(name = session_name, session_id = session_id).first()
+        session = Session.objects.filter(session_id = session_id).first()
         user = User.objects.filter(user_id = user_id).first()
 
         if not user:
