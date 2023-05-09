@@ -117,7 +117,8 @@ class WebSocketTests(TestCase):
             "type": "pull",
             "id": 1,
             "sessionId": 1,
-            "messageScale": 30 
+            "messageScale": 30,
+            "timestamp": 1145141919810
         }
         await communicator1.send_json_to(send_message)
         response = await communicator1.receive_json_from()
@@ -203,7 +204,8 @@ class WebSocketTests(TestCase):
             "type": "pull",
             "id": 1,
             "sessionId": 114514,
-            "messageScale": 30 
+            "messageScale": 30,
+            "timestamp": 1145141919810
         }
         await communicator.send_json_to(send_message)
         response = await communicator.receive_json_from()
