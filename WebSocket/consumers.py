@@ -63,6 +63,11 @@ class MyConsumer(AsyncWebsocketConsumer):
             return None
         messages = Message.objects.filter(session=session).order_by("-time")
 
+        bond = UserAndSession.objects.filter(user = self.user, session = session).first()
+        if bond.read_time < timestamp:
+            bond.read_time = timestamp
+            bond.save()
+
         def get_time_pos(messages, timestamp):
             for pos in range(len(messages)):
                 message = messages[pos]

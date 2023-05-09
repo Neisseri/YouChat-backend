@@ -257,18 +257,37 @@ def message(req: HttpRequest, id: int):
             info["isTop"] = bond.isTop
             info["isMute"] = bond.isMute
             
-            message = Message.objects.filter(session=session)
-            if message:
-                message = message.order_by("-time").first()
+            read_time = bond.read_time
+
+            messages = Message.objects.filter(session=session)
+            if messages:
+                messages = messages.order_by("-time")
+                message = messages.first()
                 info["timestamp"] = message.time
                 info["type"] = message.message_type
                 info["lastSender"] = message.sender.name
                 info["message"] = message.text
+
+                def get_time_pos(messages, timestamp):
+                    for pos in range(len(messages)):
+                        message = messages[pos]
+                        if message.time <= timestamp:
+                            return pos
+                        
+                    return len(messages)
+                
+                timepos = get_time_pos(messages, read_time)
+
+                info["unread"] = timepos
+
             else:
                 info["timestamp"] = session.time
                 info["type"] = "text"
                 info["lastSender"] = ""
                 info["message"] = ""
+
+                info["unread"] = 0
+
 
             # user_binds = UserAndSession.objects.filter(session = session)
             # time_list = {}
