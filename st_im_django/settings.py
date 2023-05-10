@@ -51,8 +51,6 @@ INSTALLED_APPS = [
     "Session",
     "WebSocket",
     "CSRF",
-
-    "WebRTC",
 ]
 
 MIDDLEWARE = [
