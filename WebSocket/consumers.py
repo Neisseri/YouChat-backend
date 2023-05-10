@@ -232,6 +232,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
 
+        await self.delete_message(message_id)
+
         response = {
 	        "code": 0,
 	        "info": "Succeed",
@@ -294,7 +296,6 @@ class MyConsumer(AsyncWebsocketConsumer):
             #     await self.user_auth(id)
             message_id = text_data_json['messageId']
             await self.group_delete_message(message_id)
-            await self.delete_message(message_id)
         else:
             raise RuntimeError
 
