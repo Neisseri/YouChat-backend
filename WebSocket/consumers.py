@@ -58,15 +58,19 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_messages(self, session_id, message_scale, timestamp):
+        updateReadTime = False
+
         session = Session.objects.filter(session_id=session_id).first()
         if not session:
-            return None
+            return None, updateReadTime
         messages = Message.objects.filter(session=session).order_by("-time")
 
         bond = UserAndSession.objects.filter(user = self.user, session = session).first()
         if bond.read_time < timestamp:
             bond.read_time = timestamp
             bond.save()
+
+            updateReadTime = True
 
         def get_time_pos(messages, timestamp):
             for pos in range(len(messages)):
@@ -91,7 +95,7 @@ class MyConsumer(AsyncWebsocketConsumer):
                 "messageType": message.message_type
             }
             message_list.append(message_data)
-        return message_list
+        return message_list, updateReadTime
 
     @database_sync_to_async
     def add_message(self, text, timestamp, session_id, user_id, message_type = "text"):
@@ -152,7 +156,19 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
 
-        message_list = await self.get_messages(session_id, message_scale, timestamp)
+        message_list, updateReadTime = await self.get_messages(session_id, message_scale, timestamp)
+
+        if updateReadTime:
+            response = {
+                "type": "updateReadTime",
+                "readTime": timestamp,
+                "userId": self.user.user_id
+            }
+            
+            await self.channel_layer.group_send(
+                "chat_%s" % session_id, {"type": "chat_message", "message": response}
+            )
+
         response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
         response_data["messages"] = message_list
         await self.send(text_data=json.dumps(response_data))
