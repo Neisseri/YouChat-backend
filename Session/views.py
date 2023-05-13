@@ -170,7 +170,7 @@ def history(req: HttpRequest):
         for i in range(len(messages)):
             message = messages[i]
             umbond = UserandMessage.objects.filter(user = user, message = message).first()
-            if umbond.is_delete:
+            if not umbond or umbond.is_delete:
                 delete_ind.append(i)
         delete_ind.reverse()
         for i in delete_ind:
