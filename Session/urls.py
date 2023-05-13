@@ -9,4 +9,5 @@ urlpatterns = [
     path('setting', views.setting),
     path('image', views.image),
     path('delete', views.delete),
+    path('history', views.history),
 ]

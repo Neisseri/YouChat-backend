@@ -148,6 +148,53 @@ def delete(req: HttpRequest):
 
     else:
         return request_failed(-1, 'Bad Method', 400)
+    
+@CheckRequire
+def history(req: HttpRequest):
+    if req.method == "GET":
+        session_id = req.GET.get("sessionId")
+        session = Session.objects.filter(session_id=session_id).first()
+
+        if not session:
+            return request_failed(2, 'Session Not exists', 400)
+        
+        user_id = req.GET.get("userId")
+        user = User.objects.get(user_id = user_id)
+
+        if not user:
+            return request_failed(2, 'User Not exists', 400)
+        
+        messages = Message.objects.filter(session=session).order_by("-time")
+        messages = list(messages)
+
+        delete_ind = []
+        for i in range(len(messages)):
+            message = messages[i]
+            umbond = UserandMessage.objects.filter(user = user, message = message).first()
+            if umbond.is_delete:
+                delete_ind.append(i)
+        delete_ind.reverse()
+        for i in delete_ind:
+            messages.pop(i)
+
+        message_list = []
+        for message in messages:
+            message_data = {
+                "senderId": message.sender.user_id,
+                "senderName": message.sender.name,
+                "timestamp": message.time,
+                "messageId": message.message_id,
+                "message": message.text,
+                "messageType": message.message_type,
+                "reply": 0
+            }
+            message_list.append(message_data)
+        
+        return request_success({"sessionId":session_id, "userId":user_id, "messages":message_list})
+
+    else:
+        return request_failed(-1, 'Bad Method', 400)
+
 
 @CheckRequire
 def image(req: HttpRequest):
