@@ -336,9 +336,24 @@ def message(req: HttpRequest, id: int):
             read_time = bond.read_time
 
             messages = Message.objects.filter(session=session)
+
             if messages:
                 messages = messages.order_by("-time")
-                message = messages.first()
+
+            messages = list(messages)
+
+            delete_ind = []
+            for i in range(len(messages)):
+                message = messages[i]
+                umbond = UserandMessage.objects.filter(user = user, message = message).first()
+                if (not umbond) or umbond.is_delete:
+                    delete_ind.append(i)
+            delete_ind.reverse()
+            for i in delete_ind:
+                messages.pop(i)
+
+            if messages:
+                message = messages[0]
                 info["timestamp"] = message.time
                 info["type"] = message.message_type
                 info["lastSender"] = message.sender.name

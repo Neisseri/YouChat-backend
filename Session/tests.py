@@ -1,7 +1,7 @@
 from django.test import TestCase
 import random
 from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
-from Session.models import Session, UserAndSession, Message
+from Session.models import Session, UserAndSession, Message, UserandMessage
 
 # Create your tests here.
 class SessionTests(TestCase):
@@ -72,6 +72,9 @@ class SessionTests(TestCase):
                                          XiHAAEChlkHCBAgEBMwzLFAvEOAAAHDrAMECBCICRjmWCDeIUCAgGHWAQIECMQEDHMsEO8QIEDAMOsAAQIEYgKGORaIdwgQIGCYdYAAAQIxAcMcC8Q7BAgQMMw6QIAAgZiAYY4F4h0CBAgYZh0gQIBATMAwxwLxDgECBAyzDhAgQCAmYJhjgXiHAAEChlkHCBAgEBMwzLFAvEOAAAHDrAMECBCICRjmWCDeIUCAgGHWAQIECMQEDHMsEO8QIEDAMOsAAQIEYgKGORaIdwgQIGCYdYAAAQIxAcMcC8Q7BAgQMMw6QIAAgZiAYY4F4h0CBAgYZh0gQIBATMAwxwLxDgECBAyzDhAgQCAmYJh\
                                          jgXiHAAEChlkHCBAgEBMwzLFAvEOAAAHDrAMECBCICRjmWCDeIUCAgGHWAQIECMQEDHMsEO8QIEDAMOsAAQIEYgKGORaIdwgQIGCYdYAAAQIxAcMcC8Q7BAgQMMw6QIAAgZiAYY4F4h0CBAgYZh0gQIBATMAwxwLxDgECBAyzDhAgQCAmYJhjgXiHAAEChlkHCBAgEBMwzLFAvEOAAAHDrAMECBCICRjmWCDeIUCAgGHWAQIECMQEDHMsEO8QIEDAMOsAAQIEYgKGORaIdwgQIGCYdYAAAQIxgQXJOXQykDmSewAAAABJRU5ErkJggg==", session=session, sender=carol, message_type="photo")
         img_msg.save()
+        
+        userAndMessage1 = UserandMessage.objects.create(user=carol, message=img_msg)
+        userAndMessage2 = UserandMessage.objects.create(user=dave, message=img_msg)
         
     # Utility Functions
     def get_image(self, message_id):
