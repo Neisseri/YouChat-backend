@@ -70,7 +70,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         for i in range(len(messages)):
             message = messages[i]
             umbond = UserandMessage.objects.filter(user = self.user, message = message).first()
-            if not umbond or umbond.is_delete:
+            if (not umbond) or umbond.is_delete:
                 delete_ind.append(i)
         delete_ind.reverse()
         for i in delete_ind:
@@ -115,7 +115,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         message = Message(text=text, time=timestamp, session=session, sender=user, message_type = message_type)
         message.save()
 
-        usbonds = UserAndSession.objects.filter()
+        usbonds = UserAndSession.objects.filter(session = session)
         
         for usbond in usbonds:
             suser = usbond.user
