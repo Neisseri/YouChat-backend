@@ -48,6 +48,8 @@ class Message(models.Model):
     type = models.IntegerField(default=0)
     message_type = models.CharField(max_length=MAX_CHAR_LENGTH,default="text")
 
+    reply = models.IntegerField(default=-1)
+
     class Meta:
         indexes = [models.Index(fields=["time"])]
 

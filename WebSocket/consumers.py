@@ -103,16 +103,17 @@ class MyConsumer(AsyncWebsocketConsumer):
                 "timestamp": message.time,
                 "messageId": message.message_id,
                 "message": message.text,
+                "reply": message.reply,
                 "messageType": message.message_type
             }
             message_list.append(message_data)
         return message_list, updateReadTime
 
     @database_sync_to_async
-    def add_message(self, text, timestamp, session_id, user_id, message_type = "text"):
+    def add_message(self, text, timestamp, session_id, user_id, message_type = "text", reply = -1):
         user = User.objects.get(user_id=user_id)
         session = Session.objects.get(session_id=session_id)
-        message = Message(text=text, time=timestamp, session=session, sender=user, message_type = message_type)
+        message = Message(text=text, time=timestamp, session=session, sender=user, message_type = message_type, reply = reply)
         message.save()
 
         usbonds = UserAndSession.objects.filter(session = session)
@@ -193,7 +194,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(response_data))
 
     # send message
-    async def send_message(self, session_id, timestamp, text, message_type = "text"):
+    async def send_message(self, session_id, timestamp, text, message_type = "text", reply = -1):
 
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
@@ -210,7 +211,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
 
-        message_id = await self.add_message(text, timestamp, session_id, self.user_id, message_type)
+        message_id = await self.add_message(text, timestamp, session_id, self.user_id, message_type, reply)
         
         response = {
 	        "code": 0,
@@ -324,7 +325,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             message_type = text_data_json['messageType']
-            await self.send_message(session_id, timestamp, text, message_type)
+            reply = text_data_json['reply']
+            await self.send_message(session_id, timestamp, text, message_type, reply)
         elif type == 'delete':
             # id = dict(text_data_json).get('id')
             # if id:

@@ -92,7 +92,8 @@ class WebSocketTests(TestCase):
             "sessionId": 1,
             "timestamp": timestamp,
             "message": "Hello World",
-            "messageType": "text"
+            "messageType": "text",
+            "reply": -1
         }
         await communicator1.send_json_to(send_message_1)
         response1 = await communicator1.receive_json_from()
@@ -133,7 +134,8 @@ class WebSocketTests(TestCase):
                     "timestamp": timestamp,
                     "messageId": 1,
                     "message": "Hello World",
-                    "messageType": "text"
+                    "messageType": "text",
+                    "reply": -1
                 }
             ]
         }
