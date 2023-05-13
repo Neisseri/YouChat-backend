@@ -325,7 +325,9 @@ class MyConsumer(AsyncWebsocketConsumer):
             timestamp = text_data_json['timestamp']
             text = text_data_json['message']
             message_type = text_data_json['messageType']
-            reply = text_data_json['reply']
+            reply = -1
+            if "reply" in text_data_json.keys():
+                reply = text_data_json['reply']
             await self.send_message(session_id, timestamp, text, message_type, reply)
         elif type == 'delete':
             # id = dict(text_data_json).get('id')
