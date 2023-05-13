@@ -3,7 +3,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from User.models import User
-from Session.models import Session, UserAndSession, Message
+from Session.models import Session, UserAndSession, Message, UserandMessage
 
 from channels.db import database_sync_to_async
 
@@ -64,6 +64,17 @@ class MyConsumer(AsyncWebsocketConsumer):
         if not session:
             return None, updateReadTime
         messages = Message.objects.filter(session=session).order_by("-time")
+        messages = list(messages)
+
+        delete_ind = []
+        for i in range(len(messages)):
+            message = messages[i]
+            umbond = UserandMessage.objects.filter(user = self.user, message = message).first()
+            if umbond.is_delete:
+                delete_ind.append(i)
+        delete_ind.reverse()
+        for i in delete_ind:
+            messages.pop(i)
 
         bond = UserAndSession.objects.filter(user = self.user, session = session).first()
         if bond.read_time < timestamp:
@@ -103,6 +114,8 @@ class MyConsumer(AsyncWebsocketConsumer):
         session = Session.objects.get(session_id=session_id)
         message = Message(text=text, time=timestamp, session=session, sender=user, message_type = message_type)
         message.save()
+        bond = UserandMessage(user = user, message = message)
+        bond.save()
         return message.message_id
 
     @database_sync_to_async

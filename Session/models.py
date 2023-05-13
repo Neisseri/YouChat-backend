@@ -48,10 +48,20 @@ class Message(models.Model):
     type = models.IntegerField(default=0)
     message_type = models.CharField(max_length=MAX_CHAR_LENGTH,default="text")
 
-
-
     class Meta:
         indexes = [models.Index(fields=["time"])]
 
     def __str__(self) -> str:
         return self.text
+    
+class UserandMessage(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.ForeignKey(Message, on_delete=models.CASCADE)
+
+    is_delete = models.BooleanField(default=False)
+    is_at = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [models.Index(fields=["user"]), models.Index(fields=["message"])]
+        unique_together = ("user", "message")

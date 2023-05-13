@@ -8,4 +8,5 @@ urlpatterns = [
     path('message/<id>', views.message),
     path('setting', views.setting),
     path('image', views.image),
+    path('delete', views.delete),
 ]

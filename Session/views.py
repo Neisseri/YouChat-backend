@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from utils.utils_require import CheckRequire, require
 from constants.session import DEFAULT_MESSAGE_SCALE, BUILT_SESSION, FRIEDN_SESSION
-from Session.models import Session, UserAndSession, Message
+from Session.models import Session, UserAndSession, Message, UserandMessage
 from constants.session import SESSION_HOST, SESSION_MANAGER, SESSION_MEMBER, SESSION_REQUEST
 from User.models import User, UserGroup, Contacts
 from utils.utils_request import request_failed, request_success, return_field, BAD_METHOD
@@ -114,6 +114,36 @@ def setting(req: HttpRequest):
         bond.isTop = isTop
         bond.save()
 
+        return request_success()
+
+    else:
+        return request_failed(-1, 'Bad Method', 400)
+    
+@CheckRequire
+def delete(req: HttpRequest):
+    if req.method == "PUT":
+        body = json.loads(req.body.decode("utf-8"))
+
+        user_id = body["userId"]
+        message_id = body["messageId"]
+
+        user = User.objects.get(user_id = user_id)
+        message = Message.objects.get(message_id = message_id)
+
+        if not message:
+            return request_failed(2, "Message Not Existed", 400)
+
+        if not user:
+            return request_failed(2, "User Not Existed", 400)
+        
+        bond = UserandMessage.objects.filter(user = user, message = message).first()
+
+        if not bond:
+            return request_failed(2, "UserandMessage bond Not Existed", 400)
+        
+        bond.is_delete = True
+        bond.save()
+        
         return request_success()
 
     else:
