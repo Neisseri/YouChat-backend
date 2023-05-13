@@ -68,6 +68,8 @@ def manage_chatroom(req: HttpRequest):
         if not applicantUser:
             return request_failed(3, "Applicant Not Existed", 400)
         
+        role = body["role"]
+        
         manager_bond = UserAndSession.objects.filter(user = user, session = session).first()
         applicant_bond = UserAndSession.objects.filter(user = applicantUser, session = session).first()
 
@@ -76,11 +78,8 @@ def manage_chatroom(req: HttpRequest):
 
         if not applicant_bond:
             return request_failed(3, "Applicant Not Existed", 400)
-        
-        if applicant_bond.permission != SESSION_REQUEST:
-            return request_failed(4, "Already In Session", 400)
 
-        applicant_bond.permission = SESSION_MEMBER
+        applicant_bond.permission = role
         applicant_bond.save()
 
         return request_success()
