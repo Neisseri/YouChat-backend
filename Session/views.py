@@ -358,6 +358,8 @@ def message(req: HttpRequest, id: int):
                 info["type"] = message.message_type
                 info["lastSender"] = message.sender.name
                 info["message"] = message.text
+                if info["type"] == 'history':
+                    info["message"] = "转发消息"
 
                 def get_time_pos(messages, timestamp):
                     for pos in range(len(messages)):
