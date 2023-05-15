@@ -296,9 +296,9 @@ def friends_put(req: HttpRequest):
                 contact = Contacts.objects.filter(user=user, friend=target).first()
 
                 if contact:
-                    group = UserGroup.objects.filter(user=user, group_name = body['group'])
+                    user_group = UserGroup.objects.filter(user=user, group_name = body['group'])
 
-                    if not group:
+                    if not user_group:
                         user_group = UserGroup(user=user, group_name = body['group'])
                         user_group.save()
                         
