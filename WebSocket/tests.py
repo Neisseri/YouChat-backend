@@ -1,8 +1,6 @@
 from django.test import TestCase
-from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
+from User.models import User, UserGroup, Contacts
 from Session.models import Session, UserAndSession
-from websockets.sync.client import connect
-from django.http import HttpResponse, HttpRequest
 import time
 import time
 
