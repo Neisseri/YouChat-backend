@@ -259,14 +259,18 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        # date1 = datetime.datetime.fromtimestamp(time)
-        # date2 = datetime.datetime.now()
-        # seconds = (date2 - date1).total_seconds()
+        date1 = datetime.datetime.fromtimestamp(time)
+        await self.send(text_data={"code": 999, "info": "test"})
+        date2 = datetime.datetime.now()
+        await self.send(text_data={"code": 888, "info": "test"})
+        seconds = (date2 - date1).total_seconds()
+        await self.send(text_data={"code": 777, "info": "test"})
 
-        # if seconds > constants.WITHDRAW_TIME:
-        #     response_data = {"code": 4, "info": "Time Limit Exceeded"}
-        #     await self.send(text_data=json.dumps(response_data))
-        #     return
+        if seconds > constants.WITHDRAW_TIME:
+            await self.send(text_data={"code": 666, "info": "test"})
+            response_data = {"code": 4, "info": "Time Limit Exceeded"}
+            await self.send(text_data=json.dumps(response_data))
+            return
 
         await self.delete_message(message_id)
 
