@@ -1,12 +1,9 @@
-import random
-from django.test import TestCase, Client
+from django.test import TestCase
 from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
 from Session.models import Session, UserAndSession
-import json
 from websockets.sync.client import connect
 from django.http import HttpResponse, HttpRequest
 import time
-import pytest
 import time
 
 from channels.testing import WebsocketCommunicator
