@@ -236,7 +236,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             "chat_%s" % session_id, {"type": "chat_message", "message": response}
         )
 
-    async def group_delete_message(self, message_id):
+    async def group_delete_message(self, message_id, role):
 
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
@@ -254,7 +254,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         sender = await self.get_message_sender(message)
         time = await self.get_message_time(message)
         
-        if sender != self.user:
+        if sender != self.user and role == 2:
             response_data = {"code": 3, "info": "Permission Denied"}
             await self.send(text_data=json.dumps(response_data))
             return
@@ -334,7 +334,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             # if id:
             #     await self.user_auth(id)
             message_id = text_data_json['messageId']
-            await self.group_delete_message(message_id)
+            role = text_data_json['role']
+            await self.group_delete_message(message_id, role)
         else:
             raise RuntimeError
 
