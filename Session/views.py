@@ -431,6 +431,7 @@ def message(req: HttpRequest, id: int):
     else:
         return BAD_METHOD
 
+# 有道智云 https://ai.youdao.com/#/
 def translate2chinese(text):
 
     youdao_url = 'https://openapi.youdao.com/api'   # 有道api地址
@@ -456,11 +457,10 @@ def translate2chinese(text):
 
     sign = hashlib.sha256((app_id + input_text + str(uu_id) + str(time_curtime) + app_key).encode('utf-8')).hexdigest()   # sign生成
 
-
     data = {
         'q':translate_text,   # 翻译文本
-        'from':"auto",   # 源语言
-        'to':"zh-CHS",   # 翻译语言
+        'from':"auto",   # 源语言，设置为自动识别
+        'to':"zh-CHS",   # 翻译语言：中文
         'appKey':app_id,   # 应用id
         'salt':uu_id,   # 随机生产的uuid码
         'sign':sign,   # 签名
@@ -468,7 +468,8 @@ def translate2chinese(text):
         'curtime':time_curtime,   # 秒级时间戳
     }
 
-    r = requests.get(youdao_url, params = data).json()   # 获取返回的json()内容
+    r = requests.get(youdao_url, params = data).json()   
+    # 获取返回的json()内容
     return r["translation"][0]   # 获取翻译内容
 
 
@@ -477,6 +478,7 @@ def message_translate(req: HttpRequest):
 
     # https://www.deepl.com/zh/pro-api/
     if req.method == 'PUT':
+
         body = json.loads(req.body.decode('utf-8'))
         text = body['text']
             
