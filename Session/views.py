@@ -545,6 +545,7 @@ def message_transaudio(req: HttpRequest):
     if req.method == 'PUT':
         body = json.loads(req.body.decode('utf-8'))
         audio = body['audio']
+        audio = audio[22:]
             
         text = transaudio2chinese(audio)
         
