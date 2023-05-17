@@ -540,15 +540,21 @@ def transaudio2chinese(audio):
     data['type'] = 1
 
     response = do_request(data)
-    return response.content.decode('utf-8')["result"][0]
+    
+    res = json.loads(response.content.decode('utf-8'))
+    
+    if res["errorCode"] == '0':
+        return res["result"][0]
+    else: 
+        return "Sorry, can not recognitize!"
 
 @CheckRequire
 def message_transaudio(req: HttpRequest):
 
     if req.method == 'PUT':
         body = json.loads(req.body.decode('utf-8'))
-        audio = body['audio']
-        audio = audio[22:]
+        audio = list(body['audio'])
+        audio = ''.join(audio[22:])
             
         text = transaudio2chinese(audio)
         
