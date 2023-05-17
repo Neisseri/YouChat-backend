@@ -259,6 +259,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
+        await self.send(text_data=json.dumps({"code": 000, "info": "test"}))
         date1 = datetime.datetime.fromtimestamp(time)
         await self.send(text_data=json.dumps({"code": 999, "info": "test"}))
         date2 = datetime.datetime.now()
