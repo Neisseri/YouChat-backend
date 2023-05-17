@@ -139,7 +139,8 @@ class WebSocketTests(TestCase):
         send_message = {
             "type": "delete",
             "id": 1,
-            "messageId": 1
+            "messageId": 1,
+            "role": 0
         }
         await communicator1.send_json_to(send_message)
         response = await communicator1.receive_json_from()
@@ -234,7 +235,8 @@ class WebSocketTests(TestCase):
         send_message = {
             "type": "delete",
             "id": 1,
-            "messageId": 114514
+            "messageId": 114514,
+            "role": 0
         }
         await communicator.send_json_to(send_message)
         response = await communicator.receive_json_from()
