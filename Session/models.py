@@ -32,6 +32,7 @@ class UserAndSession(models.Model):
     
     isTop = models.BooleanField(default=False)
     isMute = models.BooleanField(default=False)
+    isSecret = models.BooleanField(default=False)
     
     read_time = models.FloatField(default=utils_time.get_timestamp)
     

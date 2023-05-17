@@ -98,6 +98,7 @@ def setting(req: HttpRequest):
         session_id = body["sessionId"]
         isMute = body["isMute"]
         isTop = body["isTop"]
+        isSecret = body["isSecret"]
 
         user = User.objects.get(user_id = user_id)
         session = Session.objects.get(session_id = session_id)
@@ -112,6 +113,7 @@ def setting(req: HttpRequest):
 
         bond.isMute = isMute
         bond.isTop = isTop
+        bond.isSecret = isSecret
         bond.save()
 
         return request_success()
@@ -333,6 +335,7 @@ def message(req: HttpRequest, id: int):
 
             info["isTop"] = bond.isTop
             info["isMute"] = bond.isMute
+            info["isSecret"] = bond.isSecret
             
             read_time = bond.read_time
 
