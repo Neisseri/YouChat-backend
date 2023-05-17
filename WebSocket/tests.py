@@ -1,12 +1,7 @@
-import random
-from django.test import TestCase, Client
-from User.models import User, UserGroup, Contacts, FriendRequests, TokenPair
+from django.test import TestCase
+from User.models import User, UserGroup, Contacts
 from Session.models import Session, UserAndSession
-import json
-from websockets.sync.client import connect
-from django.http import HttpResponse, HttpRequest
 import time
-import pytest
 import time
 
 from channels.testing import WebsocketCommunicator
@@ -144,7 +139,8 @@ class WebSocketTests(TestCase):
         send_message = {
             "type": "delete",
             "id": 1,
-            "messageId": 1
+            "messageId": 1,
+            "role": 0
         }
         await communicator1.send_json_to(send_message)
         response = await communicator1.receive_json_from()
@@ -239,7 +235,8 @@ class WebSocketTests(TestCase):
         send_message = {
             "type": "delete",
             "id": 1,
-            "messageId": 114514
+            "messageId": 114514,
+            "role": 0
         }
         await communicator.send_json_to(send_message)
         response = await communicator.receive_json_from()

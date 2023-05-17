@@ -236,7 +236,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             "chat_%s" % session_id, {"type": "chat_message", "message": response}
         )
 
-    async def group_delete_message(self, message_id):
+    async def group_delete_message(self, message_id, role):
 
         if not self.user:
             response_data = {"code": 1, "info": "User Not Existed"}
@@ -254,19 +254,23 @@ class MyConsumer(AsyncWebsocketConsumer):
         sender = await self.get_message_sender(message)
         time = await self.get_message_time(message)
         
-        if sender != self.user:
+        if sender != self.user and role == 2:
             response_data = {"code": 3, "info": "Permission Denied"}
             await self.send(text_data=json.dumps(response_data))
             return
         
-        # date1 = datetime.datetime.fromtimestamp(time)
-        # date2 = datetime.datetime.now()
-        # seconds = (date2 - date1).total_seconds()
+        date1 = datetime.datetime.fromtimestamp(time)
+        await self.send(text_data={"code": 999, "info": "test"})
+        date2 = datetime.datetime.now()
+        await self.send(text_data={"code": 888, "info": "test"})
+        seconds = (date2 - date1).total_seconds()
+        await self.send(text_data={"code": 777, "info": "test"})
 
-        # if seconds > constants.WITHDRAW_TIME:
-        #     response_data = {"code": 4, "info": "Time Limit Exceeded"}
-        #     await self.send(text_data=json.dumps(response_data))
-        #     return
+        if seconds > constants.WITHDRAW_TIME and role == 2:
+            await self.send(text_data={"code": 666, "info": "test"})
+            response_data = {"code": 4, "info": "Time Limit Exceeded"}
+            await self.send(text_data=json.dumps(response_data))
+            return
 
         await self.delete_message(message_id)
 
@@ -334,7 +338,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             # if id:
             #     await self.user_auth(id)
             message_id = text_data_json['messageId']
-            await self.group_delete_message(message_id)
+            role = text_data_json['role']
+            await self.group_delete_message(message_id, role)
         else:
             raise RuntimeError
 

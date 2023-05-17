@@ -8,7 +8,7 @@ from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
-from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION
+from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION, SESSION_MEMBER
 
 email2vcode = []
 
@@ -285,9 +285,9 @@ def friends_put(req: HttpRequest):
                 if not session:
                     session = Session(name = "friend", host = user, friend_contacts = new_friend_rev, type = FRIEDN_SESSION)
                     session.save()
-                    bond = UserAndSession(permission = SESSION_HOST, user = user, session = session)
+                    bond = UserAndSession(permission = SESSION_MEMBER, user = user, session = session)
                     bond.save()
-                    bond1 = UserAndSession(permission = SESSION_MANAGER, user = target, session = session)
+                    bond1 = UserAndSession(permission = SESSION_MEMBER, user = target, session = session)
                     bond1.save()
                 
                 request.delete()
@@ -296,9 +296,9 @@ def friends_put(req: HttpRequest):
                 contact = Contacts.objects.filter(user=user, friend=target).first()
 
                 if contact:
-                    group = UserGroup.objects.filter(user=user, group_name = body['group'])
+                    user_group = UserGroup.objects.filter(user=user, group_name = body['group'])
 
-                    if not group:
+                    if not user_group:
                         user_group = UserGroup(user=user, group_name = body['group'])
                         user_group.save()
                         
