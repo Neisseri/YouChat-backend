@@ -10,6 +10,10 @@ from django.db.models import Q
 import random
 from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION, SESSION_MEMBER
 
+import base64
+import cv2 as cv
+import numpy as np
+
 email2vcode = []
 
 # check if the char is a number or English letter
@@ -554,6 +558,15 @@ def transmit_img(req: HttpRequest, user_id):
             return HttpResponse(response)
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
+        
+        basehead, img = img.split(',')
+        img_data = base64.b64decode(img)
+        img_array = np.fromstring(img_data, np.uint8)
+        img = cv.imdecode(img_array, cv.COLOR_RGB2BGR)
+        img2 = cv.resize(img, (128,128))
+        image_code = str(base64.b64encode(img2))[2:-1]
+        img = basehead + "," + image_code
+        
         user.portrait = img
         user.save()
         # save the raw base64 string

@@ -17,8 +17,11 @@ channels
 channels_redis
 daphne
 websockets
+pybase64
+opencv-python
 psycopg2-binary
 uvicorn
 requests
 asyncio
 wave
+numpy
