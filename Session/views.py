@@ -15,6 +15,7 @@ import hashlib
 from urllib import parse
 import random
 import uuid
+import wave
 import time
 from WebSocket.consumers import MyConsumer
 
@@ -231,7 +232,7 @@ def join_chatroom(req: HttpRequest):
 
         session_name = session.name
 
-        return request_success({"sessionName": session_name, "members": members})
+        return request_success({"sessionName": session_name, "sessionId":session_id, "members": members})
 
     elif req.method == "POST":
         body = json.loads(req.body.decode("utf-8"))
@@ -486,6 +487,69 @@ def message_translate(req: HttpRequest):
             'code': 0,
             'info': 'Succeed',
             'text': translated_text
+        }
+
+        return request_success(response)
+
+    else:
+        return BAD_METHOD
+    
+def transaudio2chinese(audio):
+        
+    YOUDAO_URL = 'https://openapi.youdao.com/asrapi'
+    APP_KEY = '337af8c31d798a2c'
+    APP_SECRET = 't17A2QK4mt81JGWOEhWXjoPOeoU34oub'
+    
+    def truncate(q):
+        if q is None:
+            return None
+        size = len(q)
+        return q if size <= 20 else q[0:10] + str(size) + q[size-10:size]
+
+    def encrypt(signStr):
+        hash_algorithm = hashlib.sha256()
+        hash_algorithm.update(signStr.encode('utf-8'))
+        return hash_algorithm.hexdigest()
+
+    def do_request(data):
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        return requests.post(YOUDAO_URL, data=data, headers=headers)
+
+    q = audio
+
+    data = {}
+    curtime = str(int(time.time()))
+    data['curtime'] = curtime
+    salt = str(uuid.uuid1())
+    signStr = APP_KEY + truncate(q) + salt + curtime + APP_SECRET
+    sign = encrypt(signStr)
+    data['appKey'] = APP_KEY
+    data['q'] = q
+    data['salt'] = salt
+    data['sign'] = sign
+    data['signType'] = "v2"
+    data['langType'] = 'zh-CHS'
+    data['rate'] = 16000
+    data['format'] = 'wav'
+    data['channel'] = 1
+    data['type'] = 1
+
+    response = do_request(data)
+    return response.content.decode('utf-8')["result"][0]
+
+@CheckRequire
+def message_transaudio(req: HttpRequest):
+
+    if req.method == 'PUT':
+        body = json.loads(req.body.decode('utf-8'))
+        audio = body['audio']
+            
+        text = transaudio2chinese(audio)
+        
+        response = {
+            'code': 0,
+            'info': 'Succeed',
+            'text': text
         }
 
         return request_success(response)

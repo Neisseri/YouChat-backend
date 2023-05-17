@@ -21,3 +21,4 @@ psycopg2-binary
 uvicorn
 requests
 asyncio
+wave
