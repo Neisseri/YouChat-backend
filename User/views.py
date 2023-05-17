@@ -560,10 +560,16 @@ def transmit_img(req: HttpRequest, user_id):
         img = body['img']
         
         basehead, img = img.split(',')
+        
+        typ, _ = basehead.split(';')
+        _, typ = typ.split('/')
+        typ = '.' + typ
+        
         img_data = base64.b64decode(img)
         img_array = np.fromstring(img_data, np.uint8)
-        img = cv.imdecode(img_array, cv.COLOR_RGB2BGR)
-        img2 = cv.resize(img, (128,128))
+        img = cv.imdecode(img_array, cv.IMREAD_COLOR)
+        img2 = cv.resize(img, (128, 128))
+        img2 = cv.imencode(typ, img2)[1]
         image_code = str(base64.b64encode(img2))[2:-1]
         img = basehead + "," + image_code
         
