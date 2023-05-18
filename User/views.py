@@ -11,7 +11,7 @@ import random
 from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION, SESSION_MEMBER
 
 import base64
-import cv2 as cv
+# import cv2 as cv
 import numpy as np
 
 email2vcode = []
@@ -559,19 +559,19 @@ def transmit_img(req: HttpRequest, user_id):
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
         
-        basehead, img = img.split(',')
+        # basehead, img = img.split(',')
         
-        typ, _ = basehead.split(';')
-        _, typ = typ.split('/')
-        typ = '.' + typ
+        # typ, _ = basehead.split(';')
+        # _, typ = typ.split('/')
+        # typ = '.' + typ
         
-        img_data = base64.b64decode(img)
-        img_array = np.fromstring(img_data, np.uint8)
-        img = cv.imdecode(img_array, cv.IMREAD_COLOR)
-        img2 = cv.resize(img, (128, 128))
-        img2 = cv.imencode(typ, img2)[1]
-        image_code = str(base64.b64encode(img2))[2:-1]
-        img = basehead + "," + image_code
+        # img_data = base64.b64decode(img)
+        # img_array = np.fromstring(img_data, np.uint8)
+        # img = cv.imdecode(img_array, cv.IMREAD_COLOR)
+        # img2 = cv.resize(img, (128, 128))
+        # img2 = cv.imencode(typ, img2)[1]
+        # image_code = str(base64.b64encode(img2))[2:-1]
+        # img = basehead + "," + image_code
         
         user.portrait = img
         user.save()

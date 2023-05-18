@@ -18,8 +18,8 @@ channels_redis
 daphne
 websockets
 pybase64
-opencv-python
-opencv-python-headless
+# opencv-python
+# opencv-python-headless
 psycopg2-binary
 uvicorn
 requests
