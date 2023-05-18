@@ -288,8 +288,10 @@ def join_chatroom(req: HttpRequest):
             if not bond:
                 UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
 
+        session_id = session.session_id
+        timestamp = time.time()
 
-        return request_success()
+        return request_success({"sessionId":session_id, "createdAt":timestamp})
 
     elif req.method == "DELETE":
         body = json.loads(req.body.decode("utf-8"))

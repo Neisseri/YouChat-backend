@@ -186,7 +186,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             # await self.channel_layer.group_add(room_group_name, self.channel_name)
             await self.channel_layer.group_add(room_group_name, await self.get_channel_name(self.user_id))
         
-        response_data = {"code": 0, "info": "Succeed", "type": "user_auth", "channel_name": self.channel_name}
+        response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
         await self.send(text_data=json.dumps(response_data))
 
     # pull message from specific session
