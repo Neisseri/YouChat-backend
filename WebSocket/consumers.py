@@ -17,8 +17,9 @@ class MyConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def set_channel_name(self, user_id, channel_name):
         user = User.objects.filter(user_id=user_id).first()
-        user.channel_name = channel_name
-        user.save()
+        if user:
+            user.channel_name = channel_name
+            user.save()
         return True
     
     @database_sync_to_async
