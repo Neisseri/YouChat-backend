@@ -30,8 +30,6 @@ unit-test:
   before_script:
     # TODO Start: [Student] Install dependencies
     - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-    - apt-get update
-    - apt install libgl1-mesa-glx
     # TODO End: [Student] Install dependencies
   script:
     # TODO Start: [Student] Migrate and run tests
