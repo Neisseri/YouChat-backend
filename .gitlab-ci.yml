@@ -30,6 +30,7 @@ unit-test:
   before_script:
     # TODO Start: [Student] Install dependencies
     - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+    - apt install -y libgl1-mesa-glx && apt-get install -y libsm6 && apt-get install -y libxrender1 && apt-get install -y libxext-dev
     # TODO End: [Student] Install dependencies
   script:
     # TODO Start: [Student] Migrate and run tests
