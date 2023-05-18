@@ -139,6 +139,8 @@ class MyConsumer(AsyncWebsocketConsumer):
 
     # user authority verification
     async def user_auth(self, id):
+        self.channel_name = "channel_%s" % id
+
         if self.user_id:
             response_data = {"code": 0, "info": "Succeed", "type": "user_auth"}
             await self.send(text_data=json.dumps(response_data))
@@ -259,19 +261,19 @@ class MyConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(response_data))
             return
         
-        await self.send(text_data=json.dumps({"code": 000, "info": "test"}))
-        date1 = datetime.datetime.fromtimestamp(time)
-        await self.send(text_data=json.dumps({"code": 999, "info": "test"}))
-        date2 = datetime.datetime.now()
-        await self.send(text_data=json.dumps({"code": 888, "info": "test"}))
-        seconds = (date2 - date1).total_seconds()
-        await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
+        # await self.send(text_data=json.dumps({"code": 000, "info": "test"}))
+        # date1 = datetime.datetime.fromtimestamp(time)
+        # await self.send(text_data=json.dumps({"code": 999, "info": "test"}))
+        # date2 = datetime.datetime.now()
+        # await self.send(text_data=json.dumps({"code": 888, "info": "test"}))
+        # seconds = (date2 - date1).total_seconds()
+        # await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
 
-        if seconds > constants.WITHDRAW_TIME and role == 2:
-            await self.send(text_data=json.dumps({"code": 666, "info": "test"}))
-            response_data = {"code": 4, "info": "Time Limit Exceeded"}
-            await self.send(text_data=json.dumps(response_data))
-            return
+        # if seconds > constants.WITHDRAW_TIME and role == 2:
+        #     await self.send(text_data=json.dumps({"code": 666, "info": "test"}))
+        #     response_data = {"code": 4, "info": "Time Limit Exceeded"}
+        #     await self.send(text_data=json.dumps(response_data))
+        #     return
 
         await self.delete_message(message_id)
 
