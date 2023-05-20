@@ -129,6 +129,19 @@ def user(req: HttpRequest):
 
         if user.password != password:
             return request_failed(2, "Wrong Password", status_code=400)
+        
+        bonds = UserAndSession.objects.filter(user = user)
+        
+        for bond in bonds:
+            session = bond.session
+            
+            if bond.permission == SESSION_HOST:
+                otherbonds = UserAndSession.objects.filter(session)
+                
+                for otherbond in otherbonds:
+                    if otherbond.user != user:
+                        otherbond.permission = SESSION_HOST
+                        break
 
         user.delete()
 

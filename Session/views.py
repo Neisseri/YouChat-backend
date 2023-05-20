@@ -307,7 +307,16 @@ def join_chatroom(req: HttpRequest):
         if not session:
             return request_failed(2, "Session Not Existed", 400)
         
-        UserAndSession.objects.get(session = session, user = user).delete()
+        bond = UserAndSession.objects.get(session = session, user = user)
+        if bond.permission == SESSION_HOST:
+            otherbonds = UserAndSession.objects.filter(session)
+            
+            for otherbond in otherbonds:
+                if otherbond.user != user:
+                    otherbond.permission = SESSION_HOST
+                    break
+        
+        bond.delete()
         
         return request_success()
 
