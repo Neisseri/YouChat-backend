@@ -281,6 +281,25 @@ class MyConsumer(AsyncWebsocketConsumer):
             "chat_%s" % session_id, {"type": "chat_message", "message": response}
         )
         
+    async def notice_video(self, session_id, fro, too, req_josn):
+        
+        type = req_josn['type']
+        status = req_josn['status']
+        
+        response = {
+	        "code": 0,
+	        "info": "Succeed",
+            "sessionId": session_id,
+	        "type": type,
+	        "from": fro,
+            "to": too,
+            "status": status
+        }
+
+        await self.channel_layer.group_send(
+            "chat_%s" % session_id, {"type": "chat_message", "message": response}
+        )
+        
 
     async def group_delete_message(self, message_id, role):
 
@@ -410,6 +429,11 @@ class MyConsumer(AsyncWebsocketConsumer):
             fro = text_data_json['from']
             too = text_data_json['to']
             await self.videoconnect(session_id, fro, too, text_data_json)
+        elif type == 'notice_video':
+            session_id = text_data_json['sessionId']
+            fro = text_data_json['from']
+            too = text_data_json['to']
+            await self.notice_video(session_id, fro, too, text_data_json)
         elif type == 'delete':
             # id = dict(text_data_json).get('id')
             # if id:
