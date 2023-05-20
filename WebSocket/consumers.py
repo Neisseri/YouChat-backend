@@ -285,6 +285,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         
         type = req_josn['type']
         status = req_josn['status']
+        is_video = req_josn['is_video']
         
         response = {
 	        "code": 0,
@@ -293,6 +294,7 @@ class MyConsumer(AsyncWebsocketConsumer):
 	        "type": type,
 	        "from": fro,
             "to": too,
+            "is_video": is_video,
             "status": status
         }
 
