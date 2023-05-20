@@ -366,6 +366,8 @@ def message(req: HttpRequest, id: int):
                 info["message"] = message.text
                 if info["type"] == 'history':
                     info["message"] = "转发消息"
+                if info["isSecret"] == 1:
+                    info["message"] = "私密群聊不予显示"
 
                 def get_time_pos(messages, timestamp):
                     for pos in range(len(messages)):
