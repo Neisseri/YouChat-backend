@@ -11,7 +11,7 @@ import random
 from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION, SESSION_MEMBER
 
 import base64
-import cv2 as cv
+# import cv2 as cv
 import numpy as np
 
 email2vcode = []
@@ -33,8 +33,6 @@ def check_for_user_data(body):
 
     if not 5 <= len(user_name) <= 20:
         raise Exception("Bad length of [userName]", 2)
-    if not 5 <= len(password) <= 20:
-        raise Exception("Bad length of [password]", 2)
     if not 1 <= len(nickname) <= 10:
         raise Exception("Bad length of [nickname]", 2)
     if not 3 <= len(email) <= 40:
@@ -64,7 +62,6 @@ def check_for_user_name_password(body):
     password = require(body, "password", "string", err_msg="Missing or error type of [password]")
 
     assert 5 <= len(user_name) <= 20, "Bad length of [userName]"
-    assert 5 <= len(password) <= 20, "Bad length of [password]"
 
     for i in range(0, len(user_name)):
         assert (check_number_letter(user_name[i]) or user_name[i] == '_'), "Invalid char in [userName]"
@@ -130,6 +127,19 @@ def user(req: HttpRequest):
 
         if user.password != password:
             return request_failed(2, "Wrong Password", status_code=400)
+        
+        bonds = UserAndSession.objects.filter(user = user)
+        
+        for bond in bonds:
+            session = bond.session
+            
+            if bond.permission == SESSION_HOST:
+                otherbonds = UserAndSession.objects.filter(session)
+                
+                for otherbond in otherbonds:
+                    if otherbond.user != user:
+                        otherbond.permission = SESSION_HOST
+                        break
 
         user.delete()
 
@@ -560,19 +570,19 @@ def transmit_img(req: HttpRequest, user_id):
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
         
-        basehead, img = img.split(',')
+        # basehead, img = img.split(',')
         
-        typ, _ = basehead.split(';')
-        _, typ = typ.split('/')
-        typ = '.' + typ
+        # typ, _ = basehead.split(';')
+        # _, typ = typ.split('/')
+        # typ = '.' + typ
         
-        img_data = base64.b64decode(img)
-        img_array = np.fromstring(img_data, np.uint8)
-        img = cv.imdecode(img_array, cv.IMREAD_COLOR)
-        img2 = cv.resize(img, (128, 128))
-        img2 = cv.imencode(typ, img2)[1]
-        image_code = str(base64.b64encode(img2))[2:-1]
-        img = basehead + "," + image_code
+        # img_data = base64.b64decode(img)
+        # img_array = np.fromstring(img_data, np.uint8)
+        # img = cv.imdecode(img_array, cv.IMREAD_COLOR)
+        # img2 = cv.resize(img, (128, 128))
+        # img2 = cv.imencode(typ, img2)[1]
+        # image_code = str(base64.b64encode(img2))[2:-1]
+        # img = basehead + "," + image_code
         
         user.portrait = img
         user.save()

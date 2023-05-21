@@ -17,6 +17,7 @@ class User(models.Model):
     email = models.CharField(max_length=MAX_CHAR_LENGTH, unique=True)
     friends = models.ManyToManyField('self', related_name='friends_backward', through='Contacts', symmetrical=False)
     friend_requests = models.ManyToManyField('self', related_name='friend_requests_backward', through='FriendRequests', symmetrical=False)
+    channel_name = models.CharField(max_length=MAX_CHAR_LENGTH, unique=False, default="None")
     
     # TODO: add head portrait field
     portrait = models.TextField(default='')

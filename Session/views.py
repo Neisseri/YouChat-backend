@@ -288,8 +288,10 @@ def join_chatroom(req: HttpRequest):
             if not bond:
                 UserAndSession.objects.create(permission = SESSION_MEMBER, user = user, session = session)
 
+        session_id = session.session_id
+        timestamp = time.time()
 
-        return request_success()
+        return request_success({"sessionId":session_id, "createdAt":timestamp})
 
     elif req.method == "DELETE":
         body = json.loads(req.body.decode("utf-8"))
@@ -305,7 +307,16 @@ def join_chatroom(req: HttpRequest):
         if not session:
             return request_failed(2, "Session Not Existed", 400)
         
-        UserAndSession.objects.get(session = session, user = user).delete()
+        bond = UserAndSession.objects.get(session = session, user = user)
+        if bond.permission == SESSION_HOST:
+            otherbonds = UserAndSession.objects.filter(session)
+            
+            for otherbond in otherbonds:
+                if otherbond.user != user:
+                    otherbond.permission = SESSION_HOST
+                    break
+        
+        bond.delete()
         
         return request_success()
 
@@ -364,6 +375,8 @@ def message(req: HttpRequest, id: int):
                 info["message"] = message.text
                 if info["type"] == 'history':
                     info["message"] = "转发消息"
+                if info["isSecret"] == 1:
+                    info["message"] = "私密群聊不予显示"
 
                 def get_time_pos(messages, timestamp):
                     for pos in range(len(messages)):
