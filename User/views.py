@@ -51,7 +51,7 @@ def check_for_user_data(body):
             raise Exception("Invalid char in [nickname]", 2)
 
     for i in range(0, len(email)):
-        if not (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@'):
+        if not (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@' or email[i] == '_'):
             raise Exception("Invalid char in [email]", 2)
 
     return user_name, password, nickname, email
