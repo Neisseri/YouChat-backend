@@ -309,7 +309,7 @@ def join_chatroom(req: HttpRequest):
         
         bond = UserAndSession.objects.get(session = session, user = user)
         if bond.permission == SESSION_HOST:
-            otherbonds = UserAndSession.objects.filter(session)
+            otherbonds = UserAndSession.objects.filter(session = session)
             
             for otherbond in otherbonds:
                 if otherbond.user != user:
