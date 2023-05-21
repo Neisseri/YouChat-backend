@@ -81,6 +81,7 @@ def user(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
 
+    # login
     if req.method == "POST":
         user_name, password= check_for_user_name_password(body)
         
@@ -97,9 +98,9 @@ def user(req: HttpRequest):
         tokenPair.save()
         req.session['is_login'] = user.user_id
 
-        return request_success({"token":token, "id": user.user_id})
+        return request_success({"token": token, "id": user.user_id})
         
-    
+    # create a new user
     elif req.method == "PUT":
         user_name, password, nickname, email = check_for_user_data(body)
 
