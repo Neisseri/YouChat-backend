@@ -51,7 +51,7 @@ def check_for_user_data(body):
             raise Exception("Invalid char in [nickname]", 2)
 
     for i in range(0, len(email)):
-        if not (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@'):
+        if not (check_number_letter(email[i]) or email[i] == '.' or email[i] == '@' or email[i] == '_'):
             raise Exception("Invalid char in [email]", 2)
 
     return user_name, password, nickname, email
@@ -78,6 +78,7 @@ def user(req: HttpRequest):
 
     body = json.loads(req.body.decode("utf-8"))
 
+    # login
     if req.method == "POST":
         user_name, password= check_for_user_name_password(body)
         
@@ -94,9 +95,9 @@ def user(req: HttpRequest):
         tokenPair.save()
         req.session['is_login'] = user.user_id
 
-        return request_success({"token":token, "id": user.user_id})
+        return request_success({"token": token, "id": user.user_id})
         
-    
+    # create a new user
     elif req.method == "PUT":
         user_name, password, nickname, email = check_for_user_data(body)
 
