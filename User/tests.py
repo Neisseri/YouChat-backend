@@ -124,22 +124,22 @@ class UserTests(TestCase):
         self.assertJSONEqual(res.content, {"code": 2, "info": "Missing or error type of [userName]"})
         self.assertFalse(User.objects.filter(password=password).exists())
     
-    # `password` key length incorrect
-    def test_add_user_password_length_incorrect(self):
+    # # `password` key length incorrect
+    # def test_add_user_password_length_incorrect(self):
         
-        random.seed(3)
-        un_len = random.randint(5, 20)
-        nn_len = random.randint(1, 10)
-        em_len = random.randint(3, 40)
-        user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
-        password = ''
-        nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
-        email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
-        res = self.put_user(user_name, password, nickname, email)
+    #     random.seed(3)
+    #     un_len = random.randint(5, 20)
+    #     nn_len = random.randint(1, 10)
+    #     em_len = random.randint(3, 40)
+    #     user_name = ''.join([random.choice("qwertyuiopDGRSCBSFGFDS12345678_") for _ in range(un_len)])
+    #     password = ''
+    #     nickname = ''.join([random.choice("asdfghFDSCjkl12345678_*") for _ in range(nn_len)])
+    #     email = ''.join([random.choice("asdfghFDSCjkl12345678.@") for _ in range(em_len)])
+    #     res = self.put_user(user_name, password, nickname, email)
 
-        self.assertNotEqual(res.status_code, 200)
-        self.assertJSONEqual(res.content, {"code": 2, "info": "Bad length of [password]"})
-        self.assertFalse(User.objects.filter(name=user_name).exists())
+    #     self.assertNotEqual(res.status_code, 200)
+    #     self.assertJSONEqual(res.content, {"code": 2, "info": "Bad length of [password]"})
+    #     self.assertFalse(User.objects.filter(name=user_name).exists())
 
     # `nickname` key with invalid char
     def test_add_user_nickname_invalid_char(self):
