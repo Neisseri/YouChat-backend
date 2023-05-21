@@ -319,7 +319,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         
         session_id = await self.get_session_id_by_message_id(message_id)
         sender = await self.get_message_sender(message)
-        time = await self.get_message_time(message)
+        time1 = await self.get_message_time(message)
         
         if sender != self.user and role == 2:
             response_data = {"code": 3, "info": "Permission Denied"}
@@ -333,12 +333,14 @@ class MyConsumer(AsyncWebsocketConsumer):
         # await self.send(text_data=json.dumps({"code": 888, "info": "test"}))
         # seconds = (date2 - date1).total_seconds()
         # await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
+        
+        time2 = (datetime.datetime.now()).timestamp()
+        seconds = (time2 - time1)
 
-        # if seconds > constants.WITHDRAW_TIME and role == 2:
-        #     await self.send(text_data=json.dumps({"code": 666, "info": "test"}))
-        #     response_data = {"code": 4, "info": "Time Limit Exceeded"}
-        #     await self.send(text_data=json.dumps(response_data))
-        #     return
+        if seconds > constants.WITHDRAW_TIME and role == 2:
+            response_data = {"code": 4, "info": "Time Limit Exceeded"}
+            await self.send(text_data=json.dumps(response_data))
+            return
 
         await self.delete_message(message_id)
 
