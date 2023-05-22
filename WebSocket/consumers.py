@@ -61,6 +61,11 @@ class MyConsumer(AsyncWebsocketConsumer):
         return session
     
     @database_sync_to_async
+    def get_session_type(self, session_id):
+        session = Session.objects.filter(session_id=session_id).first()
+        return session.type
+    
+    @database_sync_to_async
     def get_message(self, message_id):
         message = Message.objects.filter(message_id = message_id).first()
         return message
@@ -322,7 +327,12 @@ class MyConsumer(AsyncWebsocketConsumer):
         session_id = await self.get_session_id_by_message_id(message_id)
         sender = await self.get_message_sender(message)
         time1 = await self.get_message_time(message)
+<<<<<<< Updated upstream
         # session = await self.get_session(session_id)
+=======
+        session = await self.get_session(session_id)
+        session_type = await self.get_session_type(session_id)
+>>>>>>> Stashed changes
 
         '''
         manager_bond = UserAndSession.objects.filter(
@@ -348,7 +358,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         time2 = (datetime.datetime.now()).timestamp()
         seconds = (time2 - time1)
 
-        if seconds > constants.WITHDRAW_TIME and role == 2:
+        if seconds > constants.WITHDRAW_TIME and (role == 2 or session_type == 2):
             response_data = {"code": 4, "info": "Time Limit Exceeded"}
             await self.send(text_data=json.dumps(response_data))
             return

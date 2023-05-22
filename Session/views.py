@@ -374,7 +374,15 @@ def message(req: HttpRequest, id: int):
                 info["lastSender"] = message.sender.name
                 info["message"] = message.text
                 if info["type"] == 'history':
-                    info["message"] = "转发消息"
+                    info["message"] = "[转发消息]"
+                if info["type"] == 'voice':
+                    info["message"] = "[语音]"
+                if info["type"] == 'file':
+                    info["message"] = "[文件]"
+                if info["type"] == 'video':
+                    info["message"] = "[视频]"
+                if info["type"] == 'photo':
+                    info["message"] = "[图片]"
                 if info["isSecret"] == 1:
                     info["message"] = "私密群聊不予显示"
 
