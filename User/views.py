@@ -96,6 +96,11 @@ def user(req: HttpRequest):
     # create a new user
     elif req.method == "PUT":
         user_name, password, nickname, email = check_for_user_data(body)
+        
+        email_chk = User.objects.filter(email=email).first()
+        
+        if email_chk:
+            return request_failed(8, "email exists", status_code=400)
 
         #find the user to check if exists.
         user = User.objects.filter(name=user_name).first()
