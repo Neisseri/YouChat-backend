@@ -329,7 +329,8 @@ class MyConsumer(AsyncWebsocketConsumer):
             session = session
         ).first()
         
-        if sender != self.user and role == 2 or (manager_bond.permission == SESSION_HOST and role != SESSION_HOST):
+        #  and role != SESSION_HOST
+        if sender != self.user and role == 2 or (manager_bond.permission == SESSION_HOST):
             response_data = {"code": 3, "info": "Permission Denied"}
             await self.send(text_data=json.dumps(response_data))
             return
