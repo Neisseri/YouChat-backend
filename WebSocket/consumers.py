@@ -322,12 +322,14 @@ class MyConsumer(AsyncWebsocketConsumer):
         session_id = await self.get_session_id_by_message_id(message_id)
         sender = await self.get_message_sender(message)
         time1 = await self.get_message_time(message)
-        session = await self.get_session(session_id)
+        # session = await self.get_session(session_id)
 
+        '''
         manager_bond = UserAndSession.objects.filter(
             user = sender, 
             session = session
         ).first()
+        '''
         
         # or (manager_bond.permission == SESSION_HOST and role != SESSION_HOST)
         if sender != self.user and role == 2:
