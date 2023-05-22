@@ -11,6 +11,8 @@ import constants.session as constants
 
 import datetime
 
+from constants.session import SESSION_HOST
+
 class MyConsumer(AsyncWebsocketConsumer):
     all_groups = {}
         
@@ -320,8 +322,15 @@ class MyConsumer(AsyncWebsocketConsumer):
         session_id = await self.get_session_id_by_message_id(message_id)
         sender = await self.get_message_sender(message)
         time1 = await self.get_message_time(message)
+        session = await self.get_session(session_id)
+
+        manager_bond = UserAndSession.objects.filter(
+            user = sender, 
+            session = session
+        ).first()
         
-        if sender != self.user and role == 2:
+        #  and role != SESSION_HOST
+        if sender != self.user and role == 2 or (manager_bond.permission == SESSION_HOST):
             response_data = {"code": 3, "info": "Permission Denied"}
             await self.send(text_data=json.dumps(response_data))
             return
@@ -444,6 +453,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             #     await self.user_auth(id)
             message_id = text_data_json['messageId']
             role = text_data_json['role']
+            
             await self.group_delete_message(message_id, role)
         elif type == 'new_session':
             session_id = text_data_json['sessionId']

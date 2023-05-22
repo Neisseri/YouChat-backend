@@ -8,11 +8,7 @@ from User.models import User, Contacts, FriendRequests, UserGroup, TokenPair
 from django.core.mail import send_mail
 from django.db.models import Q
 import random
-from constants.session import SESSION_HOST, SESSION_MANAGER, FRIEDN_SESSION, SESSION_MEMBER
-
-import base64
-# import cv2 as cv
-import numpy as np
+from constants.session import SESSION_HOST, FRIEDN_SESSION, SESSION_MEMBER
 
 email2vcode = []
 
