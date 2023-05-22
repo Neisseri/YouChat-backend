@@ -327,12 +327,9 @@ class MyConsumer(AsyncWebsocketConsumer):
         session_id = await self.get_session_id_by_message_id(message_id)
         sender = await self.get_message_sender(message)
         time1 = await self.get_message_time(message)
-<<<<<<< Updated upstream
         # session = await self.get_session(session_id)
-=======
         session = await self.get_session(session_id)
         session_type = await self.get_session_type(session_id)
->>>>>>> Stashed changes
 
         '''
         manager_bond = UserAndSession.objects.filter(
