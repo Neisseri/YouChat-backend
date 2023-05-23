@@ -153,6 +153,15 @@ class MyConsumer(AsyncWebsocketConsumer):
             umbond.save()
 
         return message.message_id
+    
+    @database_sync_to_async
+    def filter_UserAndSession(self, user: User, session: Session):
+        
+        manager_bond = UserAndSession.objects.filter(
+            user = user, 
+            session = session
+        ).first()
+        return manager_bond
 
     @database_sync_to_async
     def delete_message(self, message_id):
@@ -165,14 +174,6 @@ class MyConsumer(AsyncWebsocketConsumer):
         if len(text) < constants.MAX_MESSAGE_LENGTH:
             return True
         return False
-    
-    @database_sync_to_async
-    def filter_bond(self, sender, session):
-        
-        return UserAndSession.objects.filter(
-            user = sender, 
-            session = session
-        ).first()
 
     # user authority verification
     async def user_auth(self, id):
@@ -339,7 +340,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         session = await self.get_session(session_id)
         session_type = await self.get_session_type(session_id)
 
-        manager_bond = await self.filter_bond(sender, session) 
+        manager_bond = await self.filter_UserAndSession(sender, session) 
          
         if sender != self.user and role == 2 or (manager_bond.permission == SESSION_HOST and role != SESSION_HOST):
             response_data = {"code": 3, "info": "Permission Denied"}
