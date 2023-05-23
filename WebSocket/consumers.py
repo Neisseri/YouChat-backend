@@ -356,7 +356,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         # await self.send(text_data=json.dumps({"code": 777, "info": "test"}))
         
         time2 = (datetime.datetime.now()).timestamp()
-        seconds = (time2 - time1)
+        seconds = (time2 - time1)/1000
 
         if seconds > constants.WITHDRAW_TIME and (role == 2 or session_type == 2):
             response_data = {"code": 4, "info": "Time Limit Exceeded"}
