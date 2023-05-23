@@ -144,6 +144,11 @@ class MyConsumer(AsyncWebsocketConsumer):
         session = Session.objects.get(session_id=session_id)
         message = Message(text=text, time=timestamp, session=session, sender=user, message_type = message_type, reply = reply)
         message.save()
+        
+        bond = UserAndSession.objects.filter(user = self.user, session = session).first()
+        if bond.read_time < timestamp:
+            bond.read_time = timestamp
+            bond.save()
 
         usbonds = UserAndSession.objects.filter(session = session)
         
