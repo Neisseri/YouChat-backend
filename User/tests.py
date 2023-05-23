@@ -4,18 +4,15 @@ from User.models import User
 import zmail
 import time
 
-# for sonarqube security
-PWD = "abc1234567"
-
 # Create your tests here.
 class UserTests(TestCase):
     
     # Initializer
     def setUp(self):
-        alice = User.objects.create(name = "swim17", password = PWD, 
+        alice = User.objects.create(name = "swim17", password = "abc1234567", 
                                     nickname = "Alice", email = "17@swim.com")
         
-        bob = User.objects.create(name = "swim11", password = PWD, 
+        bob = User.objects.create(name = "swim11", password = "abc1234567", 
                                     nickname = "Bob", email = "11@swim.com")
 
     # Utility Functions
