@@ -236,7 +236,7 @@ class MyConsumer(AsyncWebsocketConsumer):
                 "chat_%s" % session_id, {"type": "chat_message", "message": response}
             )
 
-        response_data = {"code": 0, "info": "Succeed", "type": "pull", "messages": []}
+        response_data = {"code": 0, "info": "Succeed", "type": "pull", "sessionId": session_id, "messages": []}
         response_data["messages"] = message_list
         await self.send(text_data=json.dumps(response_data))
 
