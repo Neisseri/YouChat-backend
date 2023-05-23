@@ -502,7 +502,6 @@ def translate2chinese(text):
 @CheckRequire
 def message_translate(req: HttpRequest):
 
-    # https://www.deepl.com/zh/pro-api/
     if req.method == 'PUT':
 
         body = json.loads(req.body.decode('utf-8'))
