@@ -140,6 +140,7 @@ def user(req: HttpRequest):
                 for otherbond in otherbonds:
                     if otherbond.user != user:
                         otherbond.permission = SESSION_HOST
+                        otherbond.save()
                         break
 
         user.delete()
