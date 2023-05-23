@@ -68,6 +68,77 @@ def check_for_user_name_password(body):
     return user_name, password
 
 
+def user_post(req, body):
+    user_name, password= check_for_user_name_password(body)
+        
+    user = User.objects.filter(name=user_name).first()
+
+    if not user:
+        return request_failed(2, "User Not Found", status_code=400)
+
+    if user.password != password:
+        return request_failed(2, "Wrong Password", status_code=400)
+
+    token = random.randint(0, 1000)
+    tokenPair = TokenPair(user=user, token=token)
+    tokenPair.save()
+    req.session['is_login'] = user.user_id
+
+    return request_success({"token": token, "id": user.user_id})
+
+def user_put(req, body):
+    user_name, password, nickname, email = check_for_user_data(body)
+    
+    email_chk = User.objects.filter(email=email).first()
+    
+    if email_chk:
+        return request_failed(8, "email exists", status_code=400)
+
+    #find the user to check if exists.
+    user = User.objects.filter(name=user_name).first()
+
+    if not user:
+        #create a new user
+        user = User(name=user_name, password = password, nickname = nickname, email = email)
+        user.save()
+    else :
+        return request_failed(8, "User exists", status_code=400)
+
+    token = random.randint(0, 1000)
+    tokenPair = TokenPair(user=user, token=token)
+    tokenPair.save()
+
+    return request_success({"token":token, "id": user.user_id})
+
+def user_delete(req, body):
+    user_name, password= check_for_user_name_password(body)
+    
+    user = User.objects.filter(name=user_name).first()
+
+    if not user:
+        return request_failed(2, "User Not Found", status_code=400)
+
+    if user.password != password:
+        return request_failed(2, "Wrong Password", status_code=400)
+    
+    bonds = UserAndSession.objects.filter(user = user)
+    
+    for bond in bonds:
+        session = bond.session
+        
+        if bond.permission == SESSION_HOST:
+            otherbonds = UserAndSession.objects.filter(session = session)
+            
+            for otherbond in otherbonds:
+                if otherbond.user != user:
+                    otherbond.permission = SESSION_HOST
+                    otherbond.save()
+                    break
+
+    user.delete()
+
+    return request_failed(0, "Success Deleted", status_code=200)
+
 # /user view
 @CheckRequire
 def user(req: HttpRequest):
@@ -76,76 +147,14 @@ def user(req: HttpRequest):
 
     # login
     if req.method == "POST":
-        user_name, password= check_for_user_name_password(body)
-        
-        user = User.objects.filter(name=user_name).first()
-
-        if not user:
-            return request_failed(2, "User Not Found", status_code=400)
-
-        if user.password != password:
-            return request_failed(2, "Wrong Password", status_code=400)
-
-        token = random.randint(0, 1000)
-        tokenPair = TokenPair(user=user, token=token)
-        tokenPair.save()
-        req.session['is_login'] = user.user_id
-
-        return request_success({"token": token, "id": user.user_id})
+        return user_post(req, body)
         
     # create a new user
     elif req.method == "PUT":
-        user_name, password, nickname, email = check_for_user_data(body)
+        return user_put(req, body)
         
-        email_chk = User.objects.filter(email=email).first()
-        
-        if email_chk:
-            return request_failed(8, "email exists", status_code=400)
-
-        #find the user to check if exists.
-        user = User.objects.filter(name=user_name).first()
-
-        if not user:
-            #create a new user
-            user = User(name=user_name, password = password, nickname = nickname, email = email)
-            user.save()
-        else :
-            return request_failed(8, "User exists", status_code=400)
-
-        token = random.randint(0, 1000)
-        tokenPair = TokenPair(user=user, token=token)
-        tokenPair.save()
-
-        return request_success({"token":token, "id": user.user_id})
-
     elif req.method == "DELETE":
-        user_name, password= check_for_user_name_password(body)
-        
-        user = User.objects.filter(name=user_name).first()
-
-        if not user:
-            return request_failed(2, "User Not Found", status_code=400)
-
-        if user.password != password:
-            return request_failed(2, "Wrong Password", status_code=400)
-        
-        bonds = UserAndSession.objects.filter(user = user)
-        
-        for bond in bonds:
-            session = bond.session
-            
-            if bond.permission == SESSION_HOST:
-                otherbonds = UserAndSession.objects.filter(session = session)
-                
-                for otherbond in otherbonds:
-                    if otherbond.user != user:
-                        otherbond.permission = SESSION_HOST
-                        otherbond.save()
-                        break
-
-        user.delete()
-
-        return request_failed(0, "Success Deleted", status_code=200)
+        return user_delete(req, body)
         
     else:
         return request_success()
@@ -571,20 +580,6 @@ def transmit_img(req: HttpRequest, user_id):
             return HttpResponse(response)
         body = json.loads(req.body.decode("utf-8"))
         img = body['img']
-        
-        # basehead, img = img.split(',')
-        
-        # typ, _ = basehead.split(';')
-        # _, typ = typ.split('/')
-        # typ = '.' + typ
-        
-        # img_data = base64.b64decode(img)
-        # img_array = np.fromstring(img_data, np.uint8)
-        # img = cv.imdecode(img_array, cv.IMREAD_COLOR)
-        # img2 = cv.resize(img, (128, 128))
-        # img2 = cv.imencode(typ, img2)[1]
-        # image_code = str(base64.b64encode(img2))[2:-1]
-        # img = basehead + "," + image_code
         
         user.portrait = img
         user.save()
