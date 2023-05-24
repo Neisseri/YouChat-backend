@@ -270,7 +270,8 @@ class MyConsumer(AsyncWebsocketConsumer):
 	        "timestamp": timestamp,
 	        "messageId": message_id,
 	        "message": text,
-            "messageType": message_type
+            "messageType": message_type,
+            "reply": reply
         }
 
 
