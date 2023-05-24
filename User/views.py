@@ -315,6 +315,8 @@ def friends_put(req: HttpRequest):
                     bond.save()
                     bond1 = UserAndSession(permission = SESSION_MEMBER, user = target, session = session)
                     bond1.save()
+                    request.delete()
+                    return request_success({"sessionId": session.session_id})
                 
                 request.delete()
             
