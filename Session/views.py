@@ -335,6 +335,17 @@ def message(req: HttpRequest, id: int):
             return request_failed(2, "UserId Not Exists", 400)
 
         sessionsbond = UserAndSession.objects.filter(user = user)
+        
+        sessionsbond = list(sessionsbond)
+        
+        del_session_ind = []
+        for i in range(len(sessionsbond)):
+            bond = sessionsbond[i]
+            if bond.permission == 3:
+                del_session_ind.append(i)
+        del_session_ind.reverse()
+        for i in del_session_ind:
+            sessionsbond.pop(i)
 
         session_info = []
         for bond in sessionsbond:
