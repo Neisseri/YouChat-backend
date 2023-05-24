@@ -393,7 +393,7 @@ class UserTests(TestCase):
             ]})
 
         res = self.put_friends(alice_id, "Default", token)
-        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed"})
+        self.assertJSONEqual(res.content, {"code": 0, "info": "Succeed", 'sessionId': 1})
 
         res = self.get_friends("swim17", token)
         self.assertEqual(res.status_code, 200)

@@ -145,6 +145,9 @@ class SessionTests(TestCase):
         }
         return self.client.put('/session/setting', data=payload, content_type='application/json')
     
+    def get_history(self, session_id, user_id):
+        return self.client.get(f'/session/history?sessionId={session_id}&userId={user_id}', content_type='application/json')
+    
     # Now start testcases
 
     # get image message
@@ -414,8 +417,15 @@ class SessionTests(TestCase):
     #     self.assertEqual(res.json()['text'], "软件工程")
 
     def test_put_setting(self):
-        
+
         res = self.put_setting(3, 1, True,True,True)
+
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
+
+    def test_get_history(self):
+
+        res = self.get_history(1, 3)
 
         self.assertEqual(res.json()['info'], 'Succeed')
         self.assertEqual(res.json()['code'], 0)
