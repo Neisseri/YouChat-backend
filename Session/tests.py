@@ -135,6 +135,16 @@ class SessionTests(TestCase):
         }
         return self.client.put('/session/message/translate', data=payload, content_type='application/json')
     
+    def put_setting(self, user_id, session_id, is_mute, is_top, is_secret):
+        payload = {
+            "userId": user_id,
+            "sessionId": session_id,
+            "isMute": is_mute,
+            "isTop": is_top,
+            "isSecret": is_secret
+        }
+        return self.client.put('/session/setting', data=payload, content_type='application/json')
+    
     # Now start testcases
 
     # get image message
@@ -402,4 +412,11 @@ class SessionTests(TestCase):
     #     self.assertEqual(res.json()['info'], 'Succeed')
     #     self.assertEqual(res.json()['code'], 0)
     #     self.assertEqual(res.json()['text'], "软件工程")
+
+    def test_put_setting(self):
+        
+        res = self.put_setting(3, 1, True,True,True)
+
+        self.assertEqual(res.json()['info'], 'Succeed')
+        self.assertEqual(res.json()['code'], 0)
         

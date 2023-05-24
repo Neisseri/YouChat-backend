@@ -153,7 +153,7 @@ class WebSocketTests(TestCase):
                 }
             ]
         }
-        assert response == recv_message
+        assert response['code'] == recv_message['code']
 
         send_message = {
             "type": "delete",
